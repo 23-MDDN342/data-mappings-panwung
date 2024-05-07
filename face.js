@@ -4,7 +4,7 @@
  */  
 
 // remove this or set to false to enable full program (load will be slower)
-var DEBUG_MODE = false;
+var DEBUG_MODE = true;
 
 // this can be used to set the number of sliders to show
 var NUM_SLIDERS = 3;
@@ -28,6 +28,8 @@ function segment_average(segment) {
   return [sum_x / s_len , sum_y / s_len ];
 }
 
+
+
 // This where you define your own face object
 function Face() {
   // these are state variables for a face
@@ -38,9 +40,9 @@ function Face() {
   this.eye_shift = -1;   // range is -10 to 10
   this.mouth_size = 1;  // range is 0.5 to 8
 
-  this.chinColour = [153, 153, 51]
-  this.lipColour = [136, 68, 68]
-  this.eyebrowColour = [119, 85, 17]
+  this.chinColour = [153, 153, 51];
+  this.lipColour = [136, 68, 68];
+  this.eyebrowColour = [119, 85, 17];
 
   /*
    * Draw the face with position lists that include:
@@ -56,11 +58,23 @@ function Face() {
     ellipse(segment_average(positions.chin)[0], 0, 3, 4);
     noStroke();
 
+    /**
+     * LET MOUTH BE AN EXAMPLE
+     * - what this code does is that it first takes in some face
+     * - then it generates points on the face based on the features of that face
+     * - the ellipse draw is taking the average position of the mouth points and then using them
+     *   as an (x, y) position for drawing an ellipse
+     * - this.mouth_size is a slider value used for making the mouth bigger
+     * 
+     *  notice that the ellipse code is using indices ([0], [1]) - this is how it gets (x, y) from the average points
+     */
 
-    // mouth
     fill(this.detailColour);
     ellipse(segment_average(positions.bottom_lip)[0], segment_average(positions.bottom_lip)[1], 1.36, 0.25 * this.mouth_size);
 
+
+
+    
     // eyebrows
     fill( this.eyebrowColour);
     stroke( this.eyebrowColour);
