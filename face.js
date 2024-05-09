@@ -34,12 +34,13 @@ function segment_average(segment) {
 function Face() {
   // these are state variables for a face
   // (your variables should be different!)
-  this.detailColour = [204, 136, 17];
-  this.mainColour = [51, 119, 153];
+  this.detailColour = [204, 136, 17]; // colour of features
+  this.mainColour = [51, 119, 153]; // colour of main face
   this.num_eyes = 2;    // can be either 1 (cyclops) or 2 (two eyes)
   this.eye_shift = -1;   // range is -10 to 10
   this.mouth_size = 1;  // range is 0.5 to 8
 
+  // these are the lines
   this.chinColour = [153, 153, 51];
   this.lipColour = [136, 68, 68];
   this.eyebrowColour = [119, 85, 17];
@@ -50,102 +51,97 @@ function Face() {
    *    bottom_lip, top_lip, nose_tip, nose_bridge, 
    */  
   this.draw = function(positions) {
-    console.log()
-    // head
-    ellipseMode(CENTER);
-    stroke(stroke_color);
-    fill(this.mainColour);
-    ellipse(segment_average(positions.chin)[0], 0, 3, 4);
-    noStroke();
-
-    /**
-     * LET MOUTH BE AN EXAMPLE
-     * - what this code does is that it first takes in some face
-     * - then it generates points on the face based on the features of that face
-     * - the ellipse draw is taking the average position of the mouth points and then using them
-     *   as an (x, y) position for drawing an ellipse
-     * - this.mouth_size is a slider value used for making the mouth bigger
-     * 
-     *  notice that the ellipse code is using indices ([0], [1]) - this is how it gets (x, y) from the average points
-     */
-
-    fill(this.detailColour);
-    ellipse(segment_average(positions.bottom_lip)[0], segment_average(positions.bottom_lip)[1], 1.36, 0.25 * this.mouth_size);
-
-
-
+    // We're making an owl boys
     
-    // eyebrows
-    fill( this.eyebrowColour);
-    stroke( this.eyebrowColour);
-    strokeWeight(0.08);
-    this.draw_segment(positions.left_eyebrow);
-    this.draw_segment(positions.right_eyebrow);
 
-    // draw the chin segment using points
-    fill(this.chinColour);
-    stroke(this.chinColour);
-    this.draw_segment(positions.chin);
 
-    fill(100, 0, 100);
-    stroke(100, 0, 100);
-    this.draw_segment(positions.nose_bridge);
-    this.draw_segment(positions.nose_tip);
 
-    strokeWeight(0.03);
+    // console.log()
+    // // head
+    // ellipseMode(CENTER);
+    // stroke(stroke_color);
+    // fill(this.mainColour);
+    // ellipse(segment_average(positions.chin)[0], 0, 3, 4);
+    // noStroke();
 
-    fill(this.lipColour);
-    stroke(this.lipColour);
-    this.draw_segment(positions.top_lip);
-    this.draw_segment(positions.bottom_lip);
+    // /**
+    //  * LET MOUTH BE AN EXAMPLE
+    //  * - what this code does is that it first takes in some face
+    //  * - then it generates points on the face based on the features of that face
+    //  * - the ellipse draw is taking the average position of the mouth points and then using them
+    //  *   as an (x, y) position for drawing an ellipse
+    //  * - this.mouth_size is a slider value used for making the mouth bigger
+    //  * 
+    //  *  notice that the ellipse code is using indices ([0], [1]) - this is how it gets (x, y) from the average points
+    //  */
 
-    let left_eye_pos = segment_average(positions.left_eye);
-    let right_eye_pos = segment_average(positions.right_eye);
+    // fill(this.detailColour);
+    // ellipse(segment_average(positions.bottom_lip)[0], segment_average(positions.bottom_lip)[1], 1.36, 0.25 * this.mouth_size);
 
-    // eyes
-    noStroke();
-    let curEyeShift = 0.04 * this.eye_shift;
-    if(this.num_eyes == 2) {
-      fill(this.detailColour);
-      ellipse(left_eye_pos[0], left_eye_pos[1], 0.5, 0.33);
-      ellipse(right_eye_pos[0], right_eye_pos[1], 0.5, 0.33);
+    // // eyebrows
+    // fill( this.eyebrowColour);
+    // stroke( this.eyebrowColour);
+    // strokeWeight(0.08);
+    // this.draw_segment(positions.left_eyebrow);
+    // this.draw_segment(positions.right_eyebrow);
 
-      // fill(this.mainColour);
-      // ellipse(left_eye_pos[0] + curEyeShift, left_eye_pos[1], 0.18);
-      // ellipse(right_eye_pos[0] + curEyeShift, right_eye_pos[1], 0.18);
-    }
-    else {
-      let eyePosX = (left_eye_pos[0] + right_eye_pos[0]) / 2;
-      let eyePosY = (left_eye_pos[1] + right_eye_pos[1]) / 2;
+    // // draw the chin segment using points
+    // fill(this.chinColour);
+    // stroke(this.chinColour);
+    // this.draw_segment(positions.chin);
 
-      fill(this.detailColour);
-      ellipse(eyePosX, eyePosY, 0.45, 0.27);
+    // fill(100, 0, 100);
+    // stroke(100, 0, 100);
+    // this.draw_segment(positions.nose_bridge);
+    // this.draw_segment(positions.nose_tip);
 
-      fill(this.mainColour);
-      ellipse(eyePosX - 0.1 + curEyeShift, eyePosY, 0.18);
-    }
-   // fill(0)
-   //ellipse(0,0, 0.5,0.5) center point
-   //rect(-2,-2,4.5,4) sizing debug 
+    // strokeWeight(0.03);
+
+    // fill(this.lipColour);
+    // stroke(this.lipColour);
+    // this.draw_segment(positions.top_lip);
+    // this.draw_segment(positions.bottom_lip);
+
+    // let left_eye_pos = segment_average(positions.left_eye);
+    // let right_eye_pos = segment_average(positions.right_eye);
+
+    // // eyes
+    // noStroke();
+    // let curEyeShift = 0.04 * this.eye_shift;
+    // if(this.num_eyes == 2) {
+    //   fill(this.detailColour);
+    //   ellipse(left_eye_pos[0], left_eye_pos[1], 0.5, 0.33);
+    //   ellipse(right_eye_pos[0], right_eye_pos[1], 0.5, 0.33);
+    // }
+    // else {
+    //   let eyePosX = (left_eye_pos[0] + right_eye_pos[0]) / 2;
+    //   let eyePosY = (left_eye_pos[1] + right_eye_pos[1]) / 2;
+
+    //   fill(this.detailColour);
+    //   ellipse(eyePosX, eyePosY, 0.45, 0.27);
+
+    //   fill(this.mainColour);
+    //   ellipse(eyePosX - 0.1 + curEyeShift, eyePosY, 0.18);
+    // }
   }
 
   // example of a function *inside* the face object.
   // this draws a segment, and do_loop will connect the ends if true
   this.draw_segment = function(segment, do_loop) {
     for(let i=0; i<segment.length; i++) {
-        let px = segment[i][0];
-        let py = segment[i][1];
-        ellipse(px, py, 0.1);
-        if(i < segment.length - 1) {
-          let nx = segment[i+1][0];
-          let ny = segment[i+1][1];
-          line(px, py, nx, ny);
-        }
-        else if(do_loop) {
-          let nx = segment[0][0];
-          let ny = segment[0][1];
-          line(px, py, nx, ny);
-        }
+      let px = segment[i][0];
+      let py = segment[i][1];
+      ellipse(px, py, 0.1);
+      if(i < segment.length - 1) {
+        let nx = segment[i+1][0];
+        let ny = segment[i+1][1];
+        line(px, py, nx, ny);
+      }
+      else if(do_loop) {
+        let nx = segment[0][0];
+        let ny = segment[0][1];
+        line(px, py, nx, ny);
+      }
     }
   };
 
