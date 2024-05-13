@@ -45,6 +45,11 @@ function Face() {
   this.lipColour = [136, 68, 68];
   this.eyebrowColour = [119, 85, 17];
 
+  this.owlOutline = [];
+  this.owlLeftEye = [];
+  this.owlRightEye = [];
+  this.owlBeak = [];
+
   /*
    * Draw the face with position lists that include:
    *    chin, right_eye, left_eye, right_eyebrow, left_eyebrow
@@ -52,43 +57,112 @@ function Face() {
    */  
   this.draw = function(positions) {
     // We're making an owl boys
+    // use the face positions to define where the main points will be
+    // make a simple outlines based on these points using vertex()
+    // ignore ears for now
+    // use stroke to make an outline
+    // bring back the circle code to make the eyes, fill it black
+    // to make the white area of the eyes, use the circle code, no fill, only stroke
+    // beak should also be outline only
+    // to do the white area somehow? ??
+
+    // Pentagon being the owl's outline
     
 
+    push();
+    fill(0);
+    strokeWeight(0.1);
+    strokeJoin(ROUND);
+    stroke(255);
 
+    beginShape();
 
-    // console.log()
-    // // head
+    // Low points
+    vertex(positions.chin[6][0], positions.chin[6][1]);   // Bot left
+    vertex(positions.chin[10][0], positions.chin[10][1]); // Bot right
+
+    // Right Top
+    vertex(positions.chin[15][0], positions.chin[15][1]);
+
+    // Middle Top
+    vertex(
+      (positions.right_eyebrow[0][0] + positions.left_eyebrow[4][0]) / 2,
+      (positions.right_eyebrow[0][1] + positions.left_eyebrow[4][1]) / 2
+    );
+
+    // Left Top
+    vertex(positions.chin[1][0], positions.chin[1][1]);
+
+    endShape(CLOSE);
+    pop();
+
+    push();
+    const SCALE_COEF = 0.85;
+    noStroke();
+    fill(255);
+    strokeJoin(ROUND);
+
+    beginShape();
+
+    // Low points
+    vertex(positions.chin[6][0] * SCALE_COEF, positions.chin[6][1] * SCALE_COEF);   // Bot left
+    vertex(positions.chin[10][0] * SCALE_COEF, positions.chin[10][1] * SCALE_COEF); // Bot right
+
+    // Right Top
+    vertex(positions.chin[15][0] * SCALE_COEF, positions.chin[15][1] * SCALE_COEF);
+
+    // Middle Top
+    vertex(
+      SCALE_COEF * (positions.right_eyebrow[0][0] + positions.left_eyebrow[4][0]) / 2,
+      SCALE_COEF * (positions.right_eyebrow[0][1] + positions.left_eyebrow[4][1]) / 2
+    );
+
+    // Left Top
+    vertex(positions.chin[1][0] * SCALE_COEF, positions.chin[1][1] * SCALE_COEF);
+
+    endShape(CLOSE);
+
+    pop();
+
+    ellipseMode(CENTER);
+    ellipse(segment_average(positions.nose_bridge)[0], segment_average(positions.nose_bridge)[1], 0.2, 0.2);
+
+    // draw the chin segment using points
+    fill(this.chinColour);
+    stroke(this.chinColour);
+    this.draw_segment(positions.chin);
+
+    // head
     // ellipseMode(CENTER);
     // stroke(stroke_color);
     // fill(this.mainColour);
     // ellipse(segment_average(positions.chin)[0], 0, 3, 4);
     // noStroke();
 
-    // /**
-    //  * LET MOUTH BE AN EXAMPLE
-    //  * - what this code does is that it first takes in some face
-    //  * - then it generates points on the face based on the features of that face
-    //  * - the ellipse draw is taking the average position of the mouth points and then using them
-    //  *   as an (x, y) position for drawing an ellipse
-    //  * - this.mouth_size is a slider value used for making the mouth bigger
-    //  * 
-    //  *  notice that the ellipse code is using indices ([0], [1]) - this is how it gets (x, y) from the average points
-    //  */
+    /**
+     * LET MOUTH BE AN EXAMPLE
+     * - what this code does is that it first takes in some face
+     * - then it generates points on the face based on the features of that face
+     * - the ellipse draw is taking the average position of the mouth points and then using them
+     *   as an (x, y) position for drawing an ellipse
+     * - this.mouth_size is a slider value used for making the mouth bigger
+     * 
+     *  notice that the ellipse code is using indices ([0], [1]) - this is how it gets (x, y) from the average points
+     */
 
     // fill(this.detailColour);
     // ellipse(segment_average(positions.bottom_lip)[0], segment_average(positions.bottom_lip)[1], 1.36, 0.25 * this.mouth_size);
 
-    // // eyebrows
+    
+
+    // eyebrows
     // fill( this.eyebrowColour);
     // stroke( this.eyebrowColour);
     // strokeWeight(0.08);
     // this.draw_segment(positions.left_eyebrow);
     // this.draw_segment(positions.right_eyebrow);
 
-    // // draw the chin segment using points
-    // fill(this.chinColour);
-    // stroke(this.chinColour);
-    // this.draw_segment(positions.chin);
+
 
     // fill(100, 0, 100);
     // stroke(100, 0, 100);
@@ -123,6 +197,11 @@ function Face() {
     //   fill(this.mainColour);
     //   ellipse(eyePosX - 0.1 + curEyeShift, eyePosY, 0.18);
     // }
+
+
+
+
+
   }
 
   // example of a function *inside* the face object.

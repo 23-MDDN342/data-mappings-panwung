@@ -5,3 +5,6 @@
 REPLACE ALL TEXT IN THIS FILE
 
 This README should be used to document your design.
+
+13/05
+Began working on making owl face based on Kristoffer Zetterstrand's painting "Lemons & Owl" (https://pbs.twimg.com/media/GMeVdX_aAAACJKo.png). The outline is roughly compelte. It is missing eyes, ears, and the beak.
