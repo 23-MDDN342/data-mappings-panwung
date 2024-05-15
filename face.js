@@ -56,7 +56,7 @@ function Face() {
    *    bottom_lip, top_lip, nose_tip, nose_bridge, 
    */  
   this.draw = function(positions) {
-    // We're making an owl boys
+    // We're making an owl boys https://pbs.twimg.com/media/GMeVdX_aAAACJKo.png
     // use the face positions to define where the main points will be
     // make a simple outlines based on these points using vertex()
     // ignore ears for now
@@ -71,7 +71,7 @@ function Face() {
 
     push();
     fill(0);
-    strokeWeight(0.1);
+    strokeWeight(0.05);
     strokeJoin(ROUND);
     stroke(255);
 
@@ -122,15 +122,29 @@ function Face() {
 
     endShape(CLOSE);
 
+
+    push();
+    fill(255);
+    strokeWeight(0.15);
+    stroke(0);
+    ellipseMode(CENTER);
+    ellipse(segment_average(positions.left_eye)[0], segment_average(positions.left_eye)[1] * 0.4, 0.5, 0.5);
+    ellipse(segment_average(positions.right_eye)[0], segment_average(positions.right_eye)[1] * 0.4, 0.5, 0.5);
+
     pop();
 
-    ellipseMode(CENTER);
-    ellipse(segment_average(positions.nose_bridge)[0], segment_average(positions.nose_bridge)[1], 0.2, 0.2);
+    // pop();
+    // ellipseMode(CENTER);
+    // ellipse(segment_average(positions.nose_bridge)[0], segment_average(positions.nose_bridge)[1], 0.2, 0.2);
+
+    // push();
 
     // draw the chin segment using points
     fill(this.chinColour);
     stroke(this.chinColour);
     this.draw_segment(positions.chin);
+
+    pop();
 
     // head
     // ellipseMode(CENTER);
