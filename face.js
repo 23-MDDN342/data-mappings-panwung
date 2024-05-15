@@ -57,6 +57,7 @@ function Face() {
    */  
   this.draw = function(positions) {
     // We're making an owl boys https://pbs.twimg.com/media/GMeVdX_aAAACJKo.png
+    // Its a frog or something now 
     // use the face positions to define where the main points will be
     // make a simple outlines based on these points using vertex()
     // ignore ears for now
@@ -128,8 +129,8 @@ function Face() {
     strokeWeight(0.15);
     stroke(0);
     ellipseMode(CENTER);
-    ellipse(segment_average(positions.left_eye)[0], segment_average(positions.left_eye)[1] * 0.4, 0.5, 0.5);
-    ellipse(segment_average(positions.right_eye)[0], segment_average(positions.right_eye)[1] * 0.4, 0.5, 0.5);
+    ellipse(segment_average(positions.left_eye)[0] * 2, segment_average(positions.left_eye)[1] * 1, 0.7, 0.7);
+    ellipse(segment_average(positions.right_eye)[0] * 2, segment_average(positions.right_eye)[1] * 1, 0.7, 0.7);
 
     pop();
 
