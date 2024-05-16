@@ -11,3 +11,5 @@ Began working on making owl face based on Kristoffer Zetterstrand's painting "Le
 
 16/05
 Welp it's no longer an owl. I might try to make it look like some low poly rigid frog, e.g. the eyes will be squares instead of circles.
+
+I was planning on just porting my faces over from my previous project, but I got inspiration to make playing card faces instead. But then I was hit by a terrible idea: what if I just made kermit?

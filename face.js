@@ -33,6 +33,9 @@ function segment_average(segment) {
 function Face() {
   // these are state variables for a face
   // (your variables should be different!)
+
+  
+
   this.detailColour = [204, 136, 17]; // colour of features
   this.mainColour = [51, 119, 153]; // colour of main face
   this.num_eyes = 2;    // can be either 1 (cyclops) or 2 (two eyes)
@@ -44,17 +47,59 @@ function Face() {
   this.lipColour = [136, 68, 68];
   this.eyebrowColour = [119, 85, 17];
 
+
   this.borderPoints = [];
-  this.cardColor;
+
+  this.CARD_COLOR = [238, 207, 170];
+  this.INNER_BORDER_SCALE = 0.98;
+
+
+  this.scaleColor = function(col, factor) {
+    if (typeof col === "number") return col * factor;
+    let newCol = [];
+    for (let v of col) newCol.push(v * factor);
+    return newCol;
+  }
 
   this.generateBorder = function(chin, heightScale) {
     this.borderPoints = [
-      [chin[0][0], heightScale*chin[0][1]],  // Top Left
-      [chin[0][0], chin[8][1]],              // Bot Left
-      [chin[16][0], chin[8][1]],             // Bot right
-      [chin[16][0], heightScale*chin[16][1]] // Top right
+      [chin[0][0],  chin[0][1] * heightScale], // Top Left
+      [chin[0][0],  chin[8][1]              ], // Bot Left
+      [chin[16][0], chin[8][1]              ], // Bot right
+      [chin[16][0], chin[16][1] * heightScale] // Top right
     ];
   }
+
+  this.getBorderCenter = function() {
+    return segment_average(this.borderPoints);
+  }
+
+  this.getBorderDimensions = function() {
+    return [
+      Math.abs(this.borderPoints[0][0] - this.borderPoints[3][0]),
+      Math.abs(this.borderPoints[0][1] - this.borderPoints[1][1])
+    ];
+  }
+
+
+  this.drawBorder = function(fillCol, strokeCol, scaleFactor=1, strokeWeightFactor=0.2) {
+    push();
+    noFill();
+    noStroke();
+
+    if (fillCol !== undefined) { fill(fillCol) }
+    if (strokeCol !== undefined) { stroke(strokeCol) }
+
+    strokeJoin(ROUND);
+    strokeWeight(strokeWeightFactor);
+    beginShape();
+    for (let bp of this.borderPoints) {
+      vertex(scaleFactor * bp[0], scaleFactor * bp[1])
+    }
+    endShape(CLOSE);
+    pop();
+  }
+
 
   /*
    * Draw the face with position lists that include:
@@ -65,7 +110,7 @@ function Face() {
     const CHIN = positions.chin;
 
     const RIGHT_EYE = positions.right_eye;
-    const Left_EYE = positions.right_eye;
+    const LEFT_EYE = positions.right_eye;
 
     const RIGHT_EYEBROW = positions.right_eyebrow;
     const LEFT_EYEBROW = positions.left_eyebrow;
@@ -76,17 +121,98 @@ function Face() {
     const NOSE_TIP = positions.nose_tip;
     const NOSE_BRIDGE = positions.nose_bridge;
 
-    const CARD_HEIGHT_SCALE = 3;
-    this.generateBorder(CHIN, CARD_HEIGHT_SCALE);
 
-    // Draw border of card
     push();
+    
+    noStroke();
+    fill(255);
+    ellipseMode(CENTER);
+    ellipse(LEFT_EYEBROW[1][0], LEFT_EYEBROW[1][1], 1.5*Math.abs(LEFT_EYE[0][0] - LEFT_EYE[3][0]), 1.5*Math.abs(LEFT_EYE[0][0] - LEFT_EYE[3][0]));
+    ellipse(RIGHT_EYEBROW[3][0], RIGHT_EYEBROW[3][1], 1.5*Math.abs(RIGHT_EYE[0][0] - RIGHT_EYE[3][0]), 1.5*Math.abs(RIGHT_EYE[0][0] - RIGHT_EYE[3][0]));
+    pop();
+
+
+
+    push();
+    const OUTLINE_SCALE = 1.07;
+    strokeJoin(ROUND);
+    strokeWeight(0.2);
+    stroke(this.scaleColor([147, 218, 86], 0.5));
+    fill(this.scaleColor([147, 218, 86], 0.5));
+    
     beginShape();
-    for (let bp of this.borderPoints) {
-      vertex(bp[0], bp[1])
-    }
+    vertex(OUTLINE_SCALE * CHIN[1][0],        OUTLINE_SCALE * CHIN[1][1]                  );
+    vertex(OUTLINE_SCALE * CHIN[8][0],        OUTLINE_SCALE * CHIN[8][1] * this.mouth_size);
+    vertex(OUTLINE_SCALE * CHIN[15][0],       OUTLINE_SCALE * CHIN[15][1]                 );
+    vertex(OUTLINE_SCALE * NOSE_BRIDGE[0][0], OUTLINE_SCALE * NOSE_BRIDGE[0][1]        * 3);
+    endShape(CLOSE);
+
+    pop();
+
+
+
+
+    push();
+    strokeJoin(ROUND);
+    strokeWeight(0.2);
+    stroke([147, 218, 86]);
+    fill([147, 218, 86]);
+    
+    beginShape();
+    vertex(CHIN[1][0], CHIN[1][1]);
+    vertex(CHIN[8][0], CHIN[8][1] * this.mouth_size);
+    vertex(CHIN[15][0], CHIN[15][1]);
+    vertex(NOSE_BRIDGE[0][0], 3*NOSE_BRIDGE[0][1]);
     endShape(CLOSE);
     pop();
+
+    push();
+    const MOUTH_SCALE = 0.7;
+    strokeJoin(ROUND);
+    strokeWeight(0.2);
+    stroke([155, 39, 65]);
+    fill([155, 39, 65]);
+
+    beginShape();
+    vertex(MOUTH_SCALE * CHIN[1][0],  MOUTH_SCALE * CHIN[1][1]);
+    vertex(MOUTH_SCALE * NOSE_BRIDGE[0][0], MOUTH_SCALE * NOSE_BRIDGE[0][1]);
+    vertex(MOUTH_SCALE * CHIN[15][0], MOUTH_SCALE * CHIN[15][1]);
+    vertex(MOUTH_SCALE * CHIN[8][0],  MOUTH_SCALE * CHIN[8][1] * this.mouth_size);
+    endShape(CLOSE);
+    pop();
+
+    // const CARD_HEIGHT_SCALE = 3;
+    // this.generateBorder(CHIN, CARD_HEIGHT_SCALE);
+
+    // // Draw border of card
+    // this.drawBorder(this.CARD_COLOR, this.CARD_COLOR);
+
+    // push();
+    
+    // ellipseMode(CENTER);
+    // noStroke();
+    // fill(this.scaleColor(this.CARD_COLOR, 0.9));
+    // ellipse(
+    //   this.getBorderCenter()[0], 
+    //   this.getBorderCenter()[1], 
+    //   this.getBorderDimensions()[0] * this.INNER_BORDER_SCALE * 4/5, 
+    //   this.getBorderDimensions()[1] * this.INNER_BORDER_SCALE * 4/5
+    // );
+    // pop();
+
+    // // this.drawBorder(this.scaleColor(this.CARD_COLOR, 0.9), this.scaleColor(this.CARD_COLOR, 0.9), 0.9);
+
+    // this.drawBorder(undefined, 0, this.INNER_BORDER_SCALE, 0.04);
+
+    push();
+
+    // Draw the chin segment using points
+    fill([255, 0, 255]);
+    stroke([255, 0, 255]);
+    this.draw_segment(positions.chin);
+
+    pop();
+
 
     // push();
     // fill(0);
@@ -168,14 +294,7 @@ function Face() {
     // ellipseMode(CENTER);
     // ellipse(segment_average(positions.nose_bridge)[0], segment_average(positions.nose_bridge)[1], 0.2, 0.2);
 
-    push();
 
-    // draw the chin segment using points
-    fill(this.chinColour);
-    stroke(this.chinColour);
-    this.draw_segment(positions.chin);
-
-    pop();
 
     // head
     // ellipseMode(CENTER);
@@ -268,7 +387,7 @@ function Face() {
   this.setProperties = function(settings) {
     this.num_eyes = int(map(settings[0], 0, 100, 1, 2));
     this.eye_shift = map(settings[1], 0, 100, -2, 2);
-    this.mouth_size = map(settings[2], 0, 100, 0.5, 8);
+    this.mouth_size = map(settings[2], 0, 100, 0.15, 1);
   }
 
   /* get internal properties as list of numbers 0-100 */
@@ -276,7 +395,7 @@ function Face() {
     let settings = new Array(3);
     settings[0] = map(this.num_eyes, 1, 2, 0, 100);
     settings[1] = map(this.eye_shift, -2, 2, 0, 100);
-    settings[2] = map(this.mouth_size, 0.5, 8, 0, 100);
+    settings[2] = map(this.mouth_size, 0.15, 1, 0, 100);
     return settings;
   }
 }
