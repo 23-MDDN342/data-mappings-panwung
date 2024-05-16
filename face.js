@@ -124,13 +124,25 @@ function Face() {
     endShape(CLOSE);
 
 
-    push();
+    
+
+    
+    let leftEyeHorizontalSize = 0.7;
+    let leftEyeVerticalSize = 0.7;
     fill(255);
     strokeWeight(0.15);
     stroke(0);
     ellipseMode(CENTER);
-    ellipse(segment_average(positions.left_eye)[0] * 2, segment_average(positions.left_eye)[1] * 1, 0.7, 0.7);
-    ellipse(segment_average(positions.right_eye)[0] * 2, segment_average(positions.right_eye)[1] * 1, 0.7, 0.7);
+    ellipse(
+      (positions.left_eye[0][0] + positions.nose_bridge[3][0])/2, 
+      (positions.left_eye[0][1] + positions.nose_bridge[3][1])/2,
+      leftEyeHorizontalSize, leftEyeVerticalSize
+    );
+    ellipse(
+      (positions.right_eye[3][0] + positions.nose_bridge[3][0])/2, 
+      (positions.right_eye[3][1] + positions.nose_bridge[3][1])/2, 
+      leftEyeHorizontalSize, leftEyeVerticalSize
+    );
 
     pop();
 
@@ -138,7 +150,7 @@ function Face() {
     // ellipseMode(CENTER);
     // ellipse(segment_average(positions.nose_bridge)[0], segment_average(positions.nose_bridge)[1], 0.2, 0.2);
 
-    // push();
+    push();
 
     // draw the chin segment using points
     fill(this.chinColour);
