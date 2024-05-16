@@ -29,7 +29,6 @@ function segment_average(segment) {
 }
 
 
-
 // This where you define your own face object
 function Face() {
   // these are state variables for a face
@@ -45,10 +44,17 @@ function Face() {
   this.lipColour = [136, 68, 68];
   this.eyebrowColour = [119, 85, 17];
 
-  this.owlOutline = [];
-  this.owlLeftEye = [];
-  this.owlRightEye = [];
-  this.owlBeak = [];
+  this.borderPoints = [];
+  this.cardColor;
+
+  this.generateBorder = function(chin, heightScale) {
+    this.borderPoints = [
+      [chin[0][0], heightScale*chin[0][1]],  // Top Left
+      [chin[0][0], chin[8][1]],              // Bot Left
+      [chin[16][0], chin[8][1]],             // Bot right
+      [chin[16][0], heightScale*chin[16][1]] // Top right
+    ];
+  }
 
   /*
    * Draw the face with position lists that include:
@@ -56,95 +62,107 @@ function Face() {
    *    bottom_lip, top_lip, nose_tip, nose_bridge, 
    */  
   this.draw = function(positions) {
-    // We're making an owl boys https://pbs.twimg.com/media/GMeVdX_aAAACJKo.png
-    // Its a frog or something now 
-    // use the face positions to define where the main points will be
-    // make a simple outlines based on these points using vertex()
-    // ignore ears for now
-    // use stroke to make an outline
-    // bring back the circle code to make the eyes, fill it black
-    // to make the white area of the eyes, use the circle code, no fill, only stroke
-    // beak should also be outline only
-    // to do the white area somehow? ??
+    const CHIN = positions.chin;
 
-    // Pentagon being the owl's outline
-    
+    const RIGHT_EYE = positions.right_eye;
+    const Left_EYE = positions.right_eye;
 
+    const RIGHT_EYEBROW = positions.right_eyebrow;
+    const LEFT_EYEBROW = positions.left_eyebrow;
+
+    const BOTTOM_LIP = positions.bottom_lip;
+    const TOP_LIP = positions.top_lip;
+
+    const NOSE_TIP = positions.nose_tip;
+    const NOSE_BRIDGE = positions.nose_bridge;
+
+    const CARD_HEIGHT_SCALE = 3;
+    this.generateBorder(CHIN, CARD_HEIGHT_SCALE);
+
+    // Draw border of card
     push();
-    fill(0);
-    strokeWeight(0.05);
-    strokeJoin(ROUND);
-    stroke(255);
-
     beginShape();
-
-    // Low points
-    vertex(positions.chin[6][0], positions.chin[6][1]);   // Bot left
-    vertex(positions.chin[10][0], positions.chin[10][1]); // Bot right
-
-    // Right Top
-    vertex(positions.chin[15][0], positions.chin[15][1]);
-
-    // Middle Top
-    vertex(
-      (positions.right_eyebrow[0][0] + positions.left_eyebrow[4][0]) / 2,
-      (positions.right_eyebrow[0][1] + positions.left_eyebrow[4][1]) / 2
-    );
-
-    // Left Top
-    vertex(positions.chin[1][0], positions.chin[1][1]);
-
+    for (let bp of this.borderPoints) {
+      vertex(bp[0], bp[1])
+    }
     endShape(CLOSE);
     pop();
 
-    push();
-    const SCALE_COEF = 0.85;
-    noStroke();
-    fill(255);
-    strokeJoin(ROUND);
+    // push();
+    // fill(0);
+    // strokeWeight(0.05);
+    // strokeJoin(ROUND);
+    // stroke(255);
 
-    beginShape();
+    // beginShape();
 
-    // Low points
-    vertex(positions.chin[6][0] * SCALE_COEF, positions.chin[6][1] * SCALE_COEF);   // Bot left
-    vertex(positions.chin[10][0] * SCALE_COEF, positions.chin[10][1] * SCALE_COEF); // Bot right
+    // // Low points
+    // vertex(positions.chin[6][0], positions.chin[6][1]);   // Bot left
+    // vertex(positions.chin[10][0], positions.chin[10][1]); // Bot right
 
-    // Right Top
-    vertex(positions.chin[15][0] * SCALE_COEF, positions.chin[15][1] * SCALE_COEF);
+    // // Right Top
+    // vertex(positions.chin[15][0], positions.chin[15][1]);
 
-    // Middle Top
-    vertex(
-      SCALE_COEF * (positions.right_eyebrow[0][0] + positions.left_eyebrow[4][0]) / 2,
-      SCALE_COEF * (positions.right_eyebrow[0][1] + positions.left_eyebrow[4][1]) / 2
-    );
+    // // Middle Top
+    // vertex(
+    //   (positions.right_eyebrow[0][0] + positions.left_eyebrow[4][0]) / 2,
+    //   (positions.right_eyebrow[0][1] + positions.left_eyebrow[4][1]) / 2
+    // );
 
-    // Left Top
-    vertex(positions.chin[1][0] * SCALE_COEF, positions.chin[1][1] * SCALE_COEF);
+    // // Left Top
+    // vertex(positions.chin[1][0], positions.chin[1][1]);
 
-    endShape(CLOSE);
+    // endShape(CLOSE);
+    // pop();
+
+    // push();
+    // const SCALE_COEF = 0.85;
+    // noStroke();
+    // fill(255);
+    // strokeJoin(ROUND);
+
+    // beginShape();
+
+    // // Low points
+    // vertex(positions.chin[6][0] * SCALE_COEF, positions.chin[6][1] * SCALE_COEF);   // Bot left
+    // vertex(positions.chin[10][0] * SCALE_COEF, positions.chin[10][1] * SCALE_COEF); // Bot right
+
+    // // Right Top
+    // vertex(positions.chin[15][0] * SCALE_COEF, positions.chin[15][1] * SCALE_COEF);
+
+    // // Middle Top
+    // vertex(
+    //   SCALE_COEF * (positions.right_eyebrow[0][0] + positions.left_eyebrow[4][0]) / 2,
+    //   SCALE_COEF * (positions.right_eyebrow[0][1] + positions.left_eyebrow[4][1]) / 2
+    // );
+
+    // // Left Top
+    // vertex(positions.chin[1][0] * SCALE_COEF, positions.chin[1][1] * SCALE_COEF);
+
+    // endShape(CLOSE);
 
 
     
 
     
-    let leftEyeHorizontalSize = 0.7;
-    let leftEyeVerticalSize = 0.7;
-    fill(255);
-    strokeWeight(0.15);
-    stroke(0);
-    ellipseMode(CENTER);
-    ellipse(
-      (positions.left_eye[0][0] + positions.nose_bridge[3][0])/2, 
-      (positions.left_eye[0][1] + positions.nose_bridge[3][1])/2,
-      leftEyeHorizontalSize, leftEyeVerticalSize
-    );
-    ellipse(
-      (positions.right_eye[3][0] + positions.nose_bridge[3][0])/2, 
-      (positions.right_eye[3][1] + positions.nose_bridge[3][1])/2, 
-      leftEyeHorizontalSize, leftEyeVerticalSize
-    );
+    // let leftEyeHorizontalSize = 0.7;
+    // let leftEyeVerticalSize = 0.7;
+    // fill(255);
+    // strokeWeight(0.15);
+    // stroke(0);
+    // ellipseMode(CENTER);
+    // ellipse(
+    //   (positions.left_eye[0][0] + positions.nose_bridge[3][0])/2, 
+    //   (positions.left_eye[0][1] + positions.nose_bridge[3][1])/2,
+    //   leftEyeHorizontalSize, leftEyeVerticalSize
+    // );
+    // ellipse(
+    //   (positions.right_eye[3][0] + positions.nose_bridge[3][0])/2, 
+    //   (positions.right_eye[3][1] + positions.nose_bridge[3][1])/2, 
+    //   leftEyeHorizontalSize, leftEyeVerticalSize
+    // );
 
-    pop();
+    // pop();
 
     // pop();
     // ellipseMode(CENTER);
@@ -224,11 +242,6 @@ function Face() {
     //   fill(this.mainColour);
     //   ellipse(eyePosX - 0.1 + curEyeShift, eyePosY, 0.18);
     // }
-
-
-
-
-
   }
 
   // example of a function *inside* the face object.
