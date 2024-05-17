@@ -47,13 +47,6 @@ function Face() {
   this.lipColour = [136, 68, 68];
   this.eyebrowColour = [119, 85, 17];
 
-
-  this.borderPoints = [];
-
-  this.CARD_COLOR = [238, 207, 170];
-  this.INNER_BORDER_SCALE = 0.98;
-
-
   this.scaleColor = function(col, factor) {
     if (typeof col === "number") return col * factor;
     let newCol = [];
@@ -61,42 +54,48 @@ function Face() {
     return newCol;
   }
 
-  this.generateBorder = function(chin, heightScale) {
-    this.borderPoints = [
-      [chin[0][0],  chin[0][1] * heightScale], // Top Left
-      [chin[0][0],  chin[8][1]              ], // Bot Left
-      [chin[16][0], chin[8][1]              ], // Bot right
-      [chin[16][0], chin[16][1] * heightScale] // Top right
-    ];
-  }
+  this.facingDir = function(chin, noseTip, margin=0, _debug=false) {
+    let facing = "neutral";
+    let faceHorizontalCenter = segment_average(chin)[0];
 
-  this.getBorderCenter = function() {
-    return segment_average(this.borderPoints);
-  }
+    if (noseTip[2][0] < faceHorizontalCenter && noseTip[2][0] < -margin) { facing = "left"; } 
+    else if (noseTip[2][0] > faceHorizontalCenter && noseTip[2][0] > margin) { facing = "right"; }
+    
+    if (_debug) {
+      push();
+      ellipseMode(CENTER);
+      noStroke(0);
 
-  this.getBorderDimensions = function() {
-    return [
-      Math.abs(this.borderPoints[0][0] - this.borderPoints[3][0]),
-      Math.abs(this.borderPoints[0][1] - this.borderPoints[1][1])
-    ];
-  }
+      fill([255, 0, 0]);
+      circle(noseTip[2][0], noseTip[2][1], 0.15);
 
+      fill([255, 255, 255]);
+      circle(segment_average(chin)[0], segment_average(chin)[1], 0.3);
 
-  this.drawBorder = function(fillCol, strokeCol, scaleFactor=1, strokeWeightFactor=0.2) {
-    push();
-    noFill();
-    noStroke();
+      textSize(0.3);
+      text(facing, 0, -1);
 
-    if (fillCol !== undefined) { fill(fillCol) }
-    if (strokeCol !== undefined) { stroke(strokeCol) }
-
-    strokeJoin(ROUND);
-    strokeWeight(strokeWeightFactor);
-    beginShape();
-    for (let bp of this.borderPoints) {
-      vertex(scaleFactor * bp[0], scaleFactor * bp[1])
+      pop();
     }
+
+    return [facing, noseTip[2][0]];
+  }
+
+  this.drawOutline = function(col, chin, noseBridge, mouthSize, outlineScale) {
+    push();
+    
+    strokeJoin(ROUND);
+    strokeWeight(0.2);
+    stroke(col);
+    fill(col);
+    
+    beginShape();
+    vertex(outlineScale * chin[1][0],        outlineScale * chin[1][1]             );
+    vertex(outlineScale * chin[8][0],        outlineScale * chin[8][1] * mouthSize );
+    vertex(outlineScale * chin[15][0],       outlineScale * chin[15][1]            );
+    vertex(outlineScale * noseBridge[0][0],  outlineScale * noseBridge[0][1] * 3   );
     endShape(CLOSE);
+
     pop();
   }
 
@@ -122,6 +121,8 @@ function Face() {
     const NOSE_BRIDGE = positions.nose_bridge;
 
 
+    let facing = this.facingDir(CHIN, NOSE_TIP);
+
     push();
     
     noStroke();
@@ -131,40 +132,10 @@ function Face() {
     ellipse(RIGHT_EYEBROW[3][0], RIGHT_EYEBROW[3][1], 1.5*Math.abs(RIGHT_EYE[0][0] - RIGHT_EYE[3][0]), 1.5*Math.abs(RIGHT_EYE[0][0] - RIGHT_EYE[3][0]));
     pop();
 
-
-
-    push();
     const OUTLINE_SCALE = 1.07;
-    strokeJoin(ROUND);
-    strokeWeight(0.2);
-    stroke(this.scaleColor([147, 218, 86], 0.5));
-    fill(this.scaleColor([147, 218, 86], 0.5));
-    
-    beginShape();
-    vertex(OUTLINE_SCALE * CHIN[1][0],        OUTLINE_SCALE * CHIN[1][1]                  );
-    vertex(OUTLINE_SCALE * CHIN[8][0],        OUTLINE_SCALE * CHIN[8][1] * this.mouth_size);
-    vertex(OUTLINE_SCALE * CHIN[15][0],       OUTLINE_SCALE * CHIN[15][1]                 );
-    vertex(OUTLINE_SCALE * NOSE_BRIDGE[0][0], OUTLINE_SCALE * NOSE_BRIDGE[0][1]        * 3);
-    endShape(CLOSE);
+    this.drawOutline(this.scaleColor([147, 218, 86], 0.3), CHIN, NOSE_BRIDGE, this.mouth_size, OUTLINE_SCALE);
+    this.drawOutline([147, 218, 86], CHIN, NOSE_BRIDGE, this.mouth_size, 1);
 
-    pop();
-
-
-
-
-    push();
-    strokeJoin(ROUND);
-    strokeWeight(0.2);
-    stroke([147, 218, 86]);
-    fill([147, 218, 86]);
-    
-    beginShape();
-    vertex(CHIN[1][0], CHIN[1][1]);
-    vertex(CHIN[8][0], CHIN[8][1] * this.mouth_size);
-    vertex(CHIN[15][0], CHIN[15][1]);
-    vertex(NOSE_BRIDGE[0][0], 3*NOSE_BRIDGE[0][1]);
-    endShape(CLOSE);
-    pop();
 
     push();
     const MOUTH_SCALE = 0.7;
@@ -181,28 +152,6 @@ function Face() {
     endShape(CLOSE);
     pop();
 
-    // const CARD_HEIGHT_SCALE = 3;
-    // this.generateBorder(CHIN, CARD_HEIGHT_SCALE);
-
-    // // Draw border of card
-    // this.drawBorder(this.CARD_COLOR, this.CARD_COLOR);
-
-    // push();
-    
-    // ellipseMode(CENTER);
-    // noStroke();
-    // fill(this.scaleColor(this.CARD_COLOR, 0.9));
-    // ellipse(
-    //   this.getBorderCenter()[0], 
-    //   this.getBorderCenter()[1], 
-    //   this.getBorderDimensions()[0] * this.INNER_BORDER_SCALE * 4/5, 
-    //   this.getBorderDimensions()[1] * this.INNER_BORDER_SCALE * 4/5
-    // );
-    // pop();
-
-    // // this.drawBorder(this.scaleColor(this.CARD_COLOR, 0.9), this.scaleColor(this.CARD_COLOR, 0.9), 0.9);
-
-    // this.drawBorder(undefined, 0, this.INNER_BORDER_SCALE, 0.04);
 
     push();
 
@@ -213,6 +162,7 @@ function Face() {
 
     pop();
 
+    this.facingDir(CHIN, NOSE_TIP, 0.08, true);
 
     // push();
     // fill(0);
