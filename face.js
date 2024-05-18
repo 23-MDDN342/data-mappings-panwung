@@ -31,21 +31,25 @@ function segment_average(segment) {
 
 // This where you define your own face object
 function Face() {
-  // these are state variables for a face
-  // (your variables should be different!)
 
-  
+  // Mouth slider properties
+  this.mouthSizeSliderMin = 0.18;
+  this.mouthSizeSliderMax = 1.8;
+  this.mouthSizeSliderValue = (this.mouthSizeSliderMin + this.mouthSizeSliderMax) / 2; 
 
-  this.detailColour = [204, 136, 17]; // colour of features
-  this.mainColour = [51, 119, 153]; // colour of main face
-  this.num_eyes = 2;    // can be either 1 (cyclops) or 2 (two eyes)
-  this.eye_shift = -1;   // range is -10 to 10
-  this.mouth_size = 1;  // range is 0.5 to 8
+  this.faceColor = [147, 218, 86];
+  this.mouthColor = [155, 39, 65];
+  this.tongueColor = [230, 53, 79];
+  this.eyeColor = [255, 255, 255];
+  this.pupilColor = [0, 0, 0];
+
 
   // these are the lines
-  this.chinColour = [153, 153, 51];
-  this.lipColour = [136, 68, 68];
-  this.eyebrowColour = [119, 85, 17];
+  this.num_eyes = 1;
+  this.eye_shift = 1;
+  this.chinColor = [153, 153, 51];
+  this.lipColor = [136, 68, 68];
+  this.eyebrowColor = [119, 85, 17];
 
   this.scaleColor = function(col, factor) {
     if (typeof col === "number") return col * factor;
@@ -81,20 +85,83 @@ function Face() {
     return [facing, noseTip[2][0]];
   }
 
-  this.drawOutline = function(col, chin, noseBridge, mouthSize, outlineScale) {
+  this.drawOutline = function(col, chin, noseBridge, mouthSize, outlineScale=1) {
     push();
-    
+    scale(1);
     strokeJoin(ROUND);
     strokeWeight(0.2);
     stroke(col);
     fill(col);
     
     beginShape();
-    vertex(outlineScale * chin[1][0],        outlineScale * chin[1][1]             );
-    vertex(outlineScale * chin[8][0],        outlineScale * chin[8][1] * mouthSize );
-    vertex(outlineScale * chin[15][0],       outlineScale * chin[15][1]            );
-    vertex(outlineScale * noseBridge[0][0],  outlineScale * noseBridge[0][1] * 3   );
+    vertex(outlineScale * chin[2][0],        outlineScale * chin[2][1]             );
+    vertex(outlineScale * chin[8][0],        outlineScale * mouthSize              );
+    vertex(outlineScale * chin[14][0],       outlineScale * chin[14][1]            );
+    vertex(outlineScale * noseBridge[0][0],  outlineScale * noseBridge[0][1] * 2.5 );
     endShape(CLOSE);
+
+    pop();
+  }
+
+  this.drawMouth = function(col, chin, noseBridge, mouthSize, mouthScale=1) {
+    push();
+    strokeJoin(ROUND);
+    strokeWeight(0.2 * mouthSize);
+    stroke(col);
+    fill(col);
+
+    beginShape();
+    vertex(mouthScale * chin[2][0],  mouthScale * chin[2][1]);
+    vertex(mouthScale * noseBridge[1][0], mouthScale * noseBridge[1][1] * mouthSize);
+    vertex(mouthScale * chin[14][0], mouthScale * chin[14][1]);
+    vertex(mouthScale * chin[8][0],  mouthScale * mouthSize);
+    endShape(CLOSE);
+
+    pop();
+  }
+  
+  this.drawContour = function(positions, alpha) {
+    push();
+    textSize(0.15);
+    for (let posString of Object.keys(positions)) {
+      fill([255, 0, 255, alpha]);
+      stroke([255, 0, 255, alpha]);
+      this.draw_segment(positions[posString]);
+
+      stroke([200, 200, 200, alpha]);
+      fill([30, 30, 30, alpha]);
+      text(posString, positions[posString][0][0], positions[posString][0][1])
+    }
+    pop();
+  }
+
+  this.drawEye = function(x, y, eyeCol, pupilCol, eye) {
+    push();
+    ellipseMode(CENTER);
+    stroke(this.scaleColor(this.eyeColor, 0.78));
+    fill(eyeCol);
+
+    ellipse(
+      x, y, 
+      1.5 * Math.abs(eye[0][0] - eye[3][0]), 
+      1.5 * Math.abs(eye[0][0] - eye[3][0])
+    );
+
+    fill(pupilCol);
+    noStroke();
+
+    ellipse(
+      x, y, 
+      0.6 * Math.abs(eye[0][0] - eye[3][0]), 
+      0.6 * Math.abs(eye[0][0] - eye[3][0])
+    );
+
+    // noFill();
+    // stroke(pupilCol);
+    // beginShape();
+    // vertex(eye[0][0], eye[0][1]);
+    // vertex(eye[1][0], eye[1][1]);
+    // endShape();
 
     pop();
   }
@@ -106,10 +173,12 @@ function Face() {
    *    bottom_lip, top_lip, nose_tip, nose_bridge, 
    */  
   this.draw = function(positions) {
+    
+    /* Positions */
     const CHIN = positions.chin;
 
     const RIGHT_EYE = positions.right_eye;
-    const LEFT_EYE = positions.right_eye;
+    const LEFT_EYE = positions.left_eye;
 
     const RIGHT_EYEBROW = positions.right_eyebrow;
     const LEFT_EYEBROW = positions.left_eyebrow;
@@ -120,197 +189,37 @@ function Face() {
     const NOSE_TIP = positions.nose_tip;
     const NOSE_BRIDGE = positions.nose_bridge;
 
-
-    let facing = this.facingDir(CHIN, NOSE_TIP);
-
-    push();
+    /* Back eyes */
+    let facing = this.facingDir(CHIN, NOSE_TIP,  0.07);
     
-    noStroke();
-    fill(255);
-    ellipseMode(CENTER);
-    ellipse(LEFT_EYEBROW[1][0], LEFT_EYEBROW[1][1], 1.5*Math.abs(LEFT_EYE[0][0] - LEFT_EYE[3][0]), 1.5*Math.abs(LEFT_EYE[0][0] - LEFT_EYE[3][0]));
-    ellipse(RIGHT_EYEBROW[3][0], RIGHT_EYEBROW[3][1], 1.5*Math.abs(RIGHT_EYE[0][0] - RIGHT_EYE[3][0]), 1.5*Math.abs(RIGHT_EYE[0][0] - RIGHT_EYE[3][0]));
-    pop();
+    if (facing[0] === "neutral" || facing[0] === "left") {
+      this.drawEye(LEFT_EYE[0][0], LEFT_EYE[0][1], this.eyeColor, this.pupilColor, LEFT_EYE);
+    }
+    if (facing[0] === "neutral" || facing[0] === "right") {
+      this.drawEye(RIGHT_EYE[3][0], RIGHT_EYE[3][1], this.eyeColor, this.pupilColor, RIGHT_EYE);
+    }
 
+    /* Outline */
     const OUTLINE_SCALE = 1.07;
-    this.drawOutline(this.scaleColor([147, 218, 86], 0.3), CHIN, NOSE_BRIDGE, this.mouth_size, OUTLINE_SCALE);
-    this.drawOutline([147, 218, 86], CHIN, NOSE_BRIDGE, this.mouth_size, 1);
+    this.drawOutline(this.scaleColor(this.faceColor, 1/3), CHIN, NOSE_BRIDGE, this.mouthSizeSliderValue, OUTLINE_SCALE);
+    this.drawOutline(this.faceColor, CHIN, NOSE_BRIDGE, this.mouthSizeSliderValue);
 
-
-    push();
+    /* Mouth */
     const MOUTH_SCALE = 0.7;
-    strokeJoin(ROUND);
-    strokeWeight(0.2);
-    stroke([155, 39, 65]);
-    fill([155, 39, 65]);
+    this.drawMouth(this.mouthColor, CHIN, NOSE_BRIDGE, this.mouthSizeSliderValue, MOUTH_SCALE);
+    this.drawMouth(this.tongueColor, CHIN, NOSE_BRIDGE, this.mouthSizeSliderValue, MOUTH_SCALE/2);
 
-    beginShape();
-    vertex(MOUTH_SCALE * CHIN[1][0],  MOUTH_SCALE * CHIN[1][1]);
-    vertex(MOUTH_SCALE * NOSE_BRIDGE[0][0], MOUTH_SCALE * NOSE_BRIDGE[0][1]);
-    vertex(MOUTH_SCALE * CHIN[15][0], MOUTH_SCALE * CHIN[15][1]);
-    vertex(MOUTH_SCALE * CHIN[8][0],  MOUTH_SCALE * CHIN[8][1] * this.mouth_size);
-    endShape(CLOSE);
-    pop();
+    /* Front eyes */
+    if (facing[0] === "right") {
+      this.drawEye(LEFT_EYE[0][0], LEFT_EYE[0][1], this.eyeColor, this.pupilColor, LEFT_EYE);
+    }
 
+    if (facing[0] === "left") {
+      this.drawEye(RIGHT_EYE[3][0], RIGHT_EYE[3][1], this.eyeColor, this.pupilColor, RIGHT_EYE);
+    }
 
-    push();
+    this.drawContour(positions, 80);
 
-    // Draw the chin segment using points
-    fill([255, 0, 255]);
-    stroke([255, 0, 255]);
-    this.draw_segment(positions.chin);
-
-    pop();
-
-    this.facingDir(CHIN, NOSE_TIP, 0.08, true);
-
-    // push();
-    // fill(0);
-    // strokeWeight(0.05);
-    // strokeJoin(ROUND);
-    // stroke(255);
-
-    // beginShape();
-
-    // // Low points
-    // vertex(positions.chin[6][0], positions.chin[6][1]);   // Bot left
-    // vertex(positions.chin[10][0], positions.chin[10][1]); // Bot right
-
-    // // Right Top
-    // vertex(positions.chin[15][0], positions.chin[15][1]);
-
-    // // Middle Top
-    // vertex(
-    //   (positions.right_eyebrow[0][0] + positions.left_eyebrow[4][0]) / 2,
-    //   (positions.right_eyebrow[0][1] + positions.left_eyebrow[4][1]) / 2
-    // );
-
-    // // Left Top
-    // vertex(positions.chin[1][0], positions.chin[1][1]);
-
-    // endShape(CLOSE);
-    // pop();
-
-    // push();
-    // const SCALE_COEF = 0.85;
-    // noStroke();
-    // fill(255);
-    // strokeJoin(ROUND);
-
-    // beginShape();
-
-    // // Low points
-    // vertex(positions.chin[6][0] * SCALE_COEF, positions.chin[6][1] * SCALE_COEF);   // Bot left
-    // vertex(positions.chin[10][0] * SCALE_COEF, positions.chin[10][1] * SCALE_COEF); // Bot right
-
-    // // Right Top
-    // vertex(positions.chin[15][0] * SCALE_COEF, positions.chin[15][1] * SCALE_COEF);
-
-    // // Middle Top
-    // vertex(
-    //   SCALE_COEF * (positions.right_eyebrow[0][0] + positions.left_eyebrow[4][0]) / 2,
-    //   SCALE_COEF * (positions.right_eyebrow[0][1] + positions.left_eyebrow[4][1]) / 2
-    // );
-
-    // // Left Top
-    // vertex(positions.chin[1][0] * SCALE_COEF, positions.chin[1][1] * SCALE_COEF);
-
-    // endShape(CLOSE);
-
-
-    
-
-    
-    // let leftEyeHorizontalSize = 0.7;
-    // let leftEyeVerticalSize = 0.7;
-    // fill(255);
-    // strokeWeight(0.15);
-    // stroke(0);
-    // ellipseMode(CENTER);
-    // ellipse(
-    //   (positions.left_eye[0][0] + positions.nose_bridge[3][0])/2, 
-    //   (positions.left_eye[0][1] + positions.nose_bridge[3][1])/2,
-    //   leftEyeHorizontalSize, leftEyeVerticalSize
-    // );
-    // ellipse(
-    //   (positions.right_eye[3][0] + positions.nose_bridge[3][0])/2, 
-    //   (positions.right_eye[3][1] + positions.nose_bridge[3][1])/2, 
-    //   leftEyeHorizontalSize, leftEyeVerticalSize
-    // );
-
-    // pop();
-
-    // pop();
-    // ellipseMode(CENTER);
-    // ellipse(segment_average(positions.nose_bridge)[0], segment_average(positions.nose_bridge)[1], 0.2, 0.2);
-
-
-
-    // head
-    // ellipseMode(CENTER);
-    // stroke(stroke_color);
-    // fill(this.mainColour);
-    // ellipse(segment_average(positions.chin)[0], 0, 3, 4);
-    // noStroke();
-
-    /**
-     * LET MOUTH BE AN EXAMPLE
-     * - what this code does is that it first takes in some face
-     * - then it generates points on the face based on the features of that face
-     * - the ellipse draw is taking the average position of the mouth points and then using them
-     *   as an (x, y) position for drawing an ellipse
-     * - this.mouth_size is a slider value used for making the mouth bigger
-     * 
-     *  notice that the ellipse code is using indices ([0], [1]) - this is how it gets (x, y) from the average points
-     */
-
-    // fill(this.detailColour);
-    // ellipse(segment_average(positions.bottom_lip)[0], segment_average(positions.bottom_lip)[1], 1.36, 0.25 * this.mouth_size);
-
-    
-
-    // eyebrows
-    // fill( this.eyebrowColour);
-    // stroke( this.eyebrowColour);
-    // strokeWeight(0.08);
-    // this.draw_segment(positions.left_eyebrow);
-    // this.draw_segment(positions.right_eyebrow);
-
-
-
-    // fill(100, 0, 100);
-    // stroke(100, 0, 100);
-    // this.draw_segment(positions.nose_bridge);
-    // this.draw_segment(positions.nose_tip);
-
-    // strokeWeight(0.03);
-
-    // fill(this.lipColour);
-    // stroke(this.lipColour);
-    // this.draw_segment(positions.top_lip);
-    // this.draw_segment(positions.bottom_lip);
-
-    // let left_eye_pos = segment_average(positions.left_eye);
-    // let right_eye_pos = segment_average(positions.right_eye);
-
-    // // eyes
-    // noStroke();
-    // let curEyeShift = 0.04 * this.eye_shift;
-    // if(this.num_eyes == 2) {
-    //   fill(this.detailColour);
-    //   ellipse(left_eye_pos[0], left_eye_pos[1], 0.5, 0.33);
-    //   ellipse(right_eye_pos[0], right_eye_pos[1], 0.5, 0.33);
-    // }
-    // else {
-    //   let eyePosX = (left_eye_pos[0] + right_eye_pos[0]) / 2;
-    //   let eyePosY = (left_eye_pos[1] + right_eye_pos[1]) / 2;
-
-    //   fill(this.detailColour);
-    //   ellipse(eyePosX, eyePosY, 0.45, 0.27);
-
-    //   fill(this.mainColour);
-    //   ellipse(eyePosX - 0.1 + curEyeShift, eyePosY, 0.18);
-    // }
   }
 
   // example of a function *inside* the face object.
@@ -337,7 +246,7 @@ function Face() {
   this.setProperties = function(settings) {
     this.num_eyes = int(map(settings[0], 0, 100, 1, 2));
     this.eye_shift = map(settings[1], 0, 100, -2, 2);
-    this.mouth_size = map(settings[2], 0, 100, 0.15, 1);
+    this.mouthSizeSliderValue = map(settings[2], 0, 100, this.mouthSizeSliderMin, this.mouthSizeSliderMax);
   }
 
   /* get internal properties as list of numbers 0-100 */
@@ -345,7 +254,7 @@ function Face() {
     let settings = new Array(3);
     settings[0] = map(this.num_eyes, 1, 2, 0, 100);
     settings[1] = map(this.eye_shift, -2, 2, 0, 100);
-    settings[2] = map(this.mouth_size, 0.15, 1, 0, 100);
+    settings[2] = map(this.mouthSizeSliderValue, this.mouthSizeSliderMin, this.mouthSizeSliderMax, 0, 100);
     return settings;
   }
 }
