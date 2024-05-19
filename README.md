@@ -19,3 +19,6 @@ Added a new method which allows the code to know whether a face is facing left, 
 
 18/05
 Made some minor adjustments to the positioning of the face. I plan on adding some additional details like spots (even though they are not part of the original design), which will be drawn based on a given face (I haven't decided how). Still need to make the line that goes through the pupil somehow, and maybe some neck details.
+
+19/05
+Made the line that goes through the pupil's curve.

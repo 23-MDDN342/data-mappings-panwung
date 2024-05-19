@@ -37,26 +37,24 @@ function Face() {
   this.mouthSizeSliderMax = 1.8;
   this.mouthSizeSliderValue = (this.mouthSizeSliderMin + this.mouthSizeSliderMax) / 2; 
 
+  // Eye shift slider properties
+  this.eyeShiftSliderMin = -0.25;
+  this.eyeShiftSliderMax = 0.25;
+  this.eyeShiftSliderValue = (this.eyeShiftSliderMin + this.eyeShiftSliderMax) / 2;
+
+  // Colours
   this.faceColor = [147, 218, 86];
   this.mouthColor = [155, 39, 65];
   this.tongueColor = [230, 53, 79];
   this.eyeColor = [255, 255, 255];
   this.pupilColor = [0, 0, 0];
 
-
   // these are the lines
   this.num_eyes = 1;
-  this.eye_shift = 1;
+  
   this.chinColor = [153, 153, 51];
   this.lipColor = [136, 68, 68];
   this.eyebrowColor = [119, 85, 17];
-
-  this.scaleColor = function(col, factor) {
-    if (typeof col === "number") return col * factor;
-    let newCol = [];
-    for (let v of col) newCol.push(v * factor);
-    return newCol;
-  }
 
   this.facingDir = function(chin, noseTip, margin=0, _debug=false) {
     let facing = "neutral";
@@ -83,6 +81,28 @@ function Face() {
     }
 
     return [facing, noseTip[2][0]];
+  }
+
+  this.drawContour = function(positions, alpha) {
+    push();
+    textSize(0.15);
+    for (let posString of Object.keys(positions)) {
+      fill([255, 0, 255, alpha]);
+      stroke([255, 0, 255, alpha]);
+      this.draw_segment(positions[posString]);
+
+      stroke([200, 200, 200, alpha]);
+      fill([30, 30, 30, alpha]);
+      text(posString, positions[posString][0][0], positions[posString][0][1])
+    }
+    pop();
+  }
+
+  this.scaleColor = function(col, factor) {
+    if (typeof col === "number") return col * factor;
+    let newCol = [];
+    for (let v of col) newCol.push(v * factor);
+    return newCol;
   }
 
   this.drawOutline = function(col, chin, noseBridge, mouthSize, outlineScale=1) {
@@ -119,30 +139,16 @@ function Face() {
 
     pop();
   }
-  
-  this.drawContour = function(positions, alpha) {
-    push();
-    textSize(0.15);
-    for (let posString of Object.keys(positions)) {
-      fill([255, 0, 255, alpha]);
-      stroke([255, 0, 255, alpha]);
-      this.draw_segment(positions[posString]);
 
-      stroke([200, 200, 200, alpha]);
-      fill([30, 30, 30, alpha]);
-      text(posString, positions[posString][0][0], positions[posString][0][1])
-    }
-    pop();
-  }
-
-  this.drawEye = function(x, y, eyeCol, pupilCol, eye) {
+  this.drawEye = function(x, y, eyeCol, pupilCol, eye, side) {
+    const EYE_OFFSET_FACTOR = 0.95
     push();
     ellipseMode(CENTER);
     stroke(this.scaleColor(this.eyeColor, 0.78));
     fill(eyeCol);
 
     ellipse(
-      x, y, 
+      x * EYE_OFFSET_FACTOR, y * EYE_OFFSET_FACTOR, 
       1.5 * Math.abs(eye[0][0] - eye[3][0]), 
       1.5 * Math.abs(eye[0][0] - eye[3][0])
     );
@@ -151,17 +157,28 @@ function Face() {
     noStroke();
 
     ellipse(
-      x, y, 
+      x + this.eyeShiftSliderValue, y, 
       0.6 * Math.abs(eye[0][0] - eye[3][0]), 
       0.6 * Math.abs(eye[0][0] - eye[3][0])
     );
 
-    // noFill();
-    // stroke(pupilCol);
-    // beginShape();
-    // vertex(eye[0][0], eye[0][1]);
-    // vertex(eye[1][0], eye[1][1]);
-    // endShape();
+    push();
+    strokeWeight(0.1);
+    noFill();
+    stroke(pupilCol);
+    let eyeLine = 0.32 * Math.abs(eye[0][0] - eye[3][0]);
+    beginShape();
+
+    vertex(x + this.eyeShiftSliderValue + eyeLine, y + ((side === "left") ? -eyeLine * 0.8 : eyeLine * 1.2));
+
+    vertex(x + this.eyeShiftSliderValue + eyeLine/2, y + ((side === "left") ? -eyeLine/2 : eyeLine/2));
+    vertex(x + this.eyeShiftSliderValue, y);
+    vertex(x + this.eyeShiftSliderValue - eyeLine/2, y + ((side === "left") ? eyeLine/2 : -eyeLine/2));
+
+    vertex(x + this.eyeShiftSliderValue - eyeLine, y + ((side === "left") ? eyeLine * 1.2 : -eyeLine * 0.8));
+
+    endShape();
+    pop();
 
     pop();
   }
@@ -192,11 +209,13 @@ function Face() {
     /* Back eyes */
     let facing = this.facingDir(CHIN, NOSE_TIP,  0.07);
     
+    
     if (facing[0] === "neutral" || facing[0] === "left") {
-      this.drawEye(LEFT_EYE[0][0], LEFT_EYE[0][1], this.eyeColor, this.pupilColor, LEFT_EYE);
+      this.drawEye(LEFT_EYE[0][0], LEFT_EYE[0][1], this.eyeColor, this.pupilColor, LEFT_EYE, "left");
+
     }
     if (facing[0] === "neutral" || facing[0] === "right") {
-      this.drawEye(RIGHT_EYE[3][0], RIGHT_EYE[3][1], this.eyeColor, this.pupilColor, RIGHT_EYE);
+      this.drawEye(RIGHT_EYE[3][0], RIGHT_EYE[3][1], this.eyeColor, this.pupilColor, RIGHT_EYE, "right");
     }
 
     /* Outline */
@@ -211,14 +230,14 @@ function Face() {
 
     /* Front eyes */
     if (facing[0] === "right") {
-      this.drawEye(LEFT_EYE[0][0], LEFT_EYE[0][1], this.eyeColor, this.pupilColor, LEFT_EYE);
+      this.drawEye(LEFT_EYE[0][0], LEFT_EYE[0][1], this.eyeColor, this.pupilColor, LEFT_EYE, "left");
     }
 
     if (facing[0] === "left") {
-      this.drawEye(RIGHT_EYE[3][0], RIGHT_EYE[3][1], this.eyeColor, this.pupilColor, RIGHT_EYE);
+      this.drawEye(RIGHT_EYE[3][0], RIGHT_EYE[3][1], this.eyeColor, this.pupilColor, RIGHT_EYE, "right");
     }
 
-    this.drawContour(positions, 80);
+    // this.drawContour(positions, 80);
 
   }
 
@@ -245,7 +264,7 @@ function Face() {
   /* set internal properties based on list numbers 0-100 */
   this.setProperties = function(settings) {
     this.num_eyes = int(map(settings[0], 0, 100, 1, 2));
-    this.eye_shift = map(settings[1], 0, 100, -2, 2);
+    this.eyeShiftSliderValue = map(settings[1], 0, 100, this.eyeShiftSliderMin, this.eyeShiftSliderMax);
     this.mouthSizeSliderValue = map(settings[2], 0, 100, this.mouthSizeSliderMin, this.mouthSizeSliderMax);
   }
 
@@ -253,7 +272,7 @@ function Face() {
   this.getProperties = function() {
     let settings = new Array(3);
     settings[0] = map(this.num_eyes, 1, 2, 0, 100);
-    settings[1] = map(this.eye_shift, -2, 2, 0, 100);
+    settings[1] = map(this.eyeShiftSliderValue, this.eyeShiftSliderMin, this.eyeShiftSliderMax, 0, 100);
     settings[2] = map(this.mouthSizeSliderValue, this.mouthSizeSliderMin, this.mouthSizeSliderMax, 0, 100);
     return settings;
   }
