@@ -28,7 +28,6 @@ function segment_average(segment) {
   return [sum_x / s_len , sum_y / s_len ];
 }
 
-
 // This where you define your own face object
 function Face() {
 
@@ -37,10 +36,10 @@ function Face() {
   this.mouthSizeSliderMax = 1.8;
   this.mouthSizeSliderValue = (this.mouthSizeSliderMin + this.mouthSizeSliderMax) / 2; 
 
-  // Eye shift slider properties
-  this.eyeShiftSliderMin = -0.25;
-  this.eyeShiftSliderMax = 0.25;
-  this.eyeShiftSliderValue = (this.eyeShiftSliderMin + this.eyeShiftSliderMax) / 2;
+  // Eye size slider properties
+  this.eyeSizeSliderMin = 0.7;
+  this.eyeSizeSliderMax = 1.3;
+  this.eyeSizeSliderValue = (this.eyeSizeSliderMin + this.eyeSizeSliderMax) / 2;
 
   // Colours
   this.faceColor = [147, 218, 86];
@@ -48,10 +47,6 @@ function Face() {
   this.tongueColor = [230, 53, 79];
   this.eyeColor = [255, 255, 255];
   this.pupilColor = [0, 0, 0];
-
-  // these are the lines
-  this.num_eyes = 1;
-  
   this.chinColor = [153, 153, 51];
   this.lipColor = [136, 68, 68];
   this.eyebrowColor = [119, 85, 17];
@@ -140,46 +135,78 @@ function Face() {
     pop();
   }
 
-  this.drawEye = function(x, y, eyeCol, pupilCol, eye, side) {
-    const EYE_OFFSET_FACTOR = 0.95
+  this.drawEye = function(x, y, eyeCol, pupilCol, eye, eyeScale, side) {
+
+    // Eye
+    const EYE_OFFSET_FACTOR = 1.07;
+    
     push();
     ellipseMode(CENTER);
     stroke(this.scaleColor(this.eyeColor, 0.78));
     fill(eyeCol);
 
+
     ellipse(
       x * EYE_OFFSET_FACTOR, y * EYE_OFFSET_FACTOR, 
-      1.5 * Math.abs(eye[0][0] - eye[3][0]), 
-      1.5 * Math.abs(eye[0][0] - eye[3][0])
+      1.5 * Math.abs(eye[0][0] - eye[3][0]) * eyeScale, 
+      1.5 * Math.abs(eye[0][0] - eye[3][0]) * eyeScale
     );
+
+    // Pupil
+    const VERTICAL_PUPIL_SHIFT = 0.15 * Math.abs(eye[0][0] - eye[3][0]);
+    const HORIZONTAL_PUPIL_SHIFT = 1.1;
+    const PUPIL_LINE_MIN_FACTOR = 0.9;
+    const PUPIL_LINE_MAX_FACTOR = 1.4;
 
     fill(pupilCol);
     noStroke();
 
     ellipse(
-      x + this.eyeShiftSliderValue, y, 
-      0.6 * Math.abs(eye[0][0] - eye[3][0]), 
-      0.6 * Math.abs(eye[0][0] - eye[3][0])
+      x * HORIZONTAL_PUPIL_SHIFT * EYE_OFFSET_FACTOR, y * EYE_OFFSET_FACTOR - VERTICAL_PUPIL_SHIFT, 
+      0.5 * Math.abs(eye[0][0] - eye[3][0]) * eyeScale, 
+      0.5 * Math.abs(eye[0][0] - eye[3][0]) * eyeScale
     );
 
+    pop();
+
+    // The weird line thing in Kermit's eye
     push();
-    strokeWeight(0.1);
+    strokeWeight(eyeScale / 10);
     noFill();
     stroke(pupilCol);
     let eyeLine = 0.32 * Math.abs(eye[0][0] - eye[3][0]);
     beginShape();
 
-    vertex(x + this.eyeShiftSliderValue + eyeLine, y + ((side === "left") ? -eyeLine * 0.8 : eyeLine * 1.2));
+    vertex(
+      x * HORIZONTAL_PUPIL_SHIFT * EYE_OFFSET_FACTOR + eyeLine, 
+      y * EYE_OFFSET_FACTOR - VERTICAL_PUPIL_SHIFT 
+      + ((side === "left") ? -eyeLine * PUPIL_LINE_MIN_FACTOR : eyeLine * PUPIL_LINE_MAX_FACTOR)
+    );
 
-    vertex(x + this.eyeShiftSliderValue + eyeLine/2, y + ((side === "left") ? -eyeLine/2 : eyeLine/2));
-    vertex(x + this.eyeShiftSliderValue, y);
-    vertex(x + this.eyeShiftSliderValue - eyeLine/2, y + ((side === "left") ? eyeLine/2 : -eyeLine/2));
+    vertex(
+      x * HORIZONTAL_PUPIL_SHIFT * EYE_OFFSET_FACTOR + eyeLine/2, 
+      y * EYE_OFFSET_FACTOR - VERTICAL_PUPIL_SHIFT  
+      + ((side === "left") ? -eyeLine/2 : eyeLine/2)
+    );
 
-    vertex(x + this.eyeShiftSliderValue - eyeLine, y + ((side === "left") ? eyeLine * 1.2 : -eyeLine * 0.8));
+    vertex(
+      x * HORIZONTAL_PUPIL_SHIFT * EYE_OFFSET_FACTOR, 
+      y * EYE_OFFSET_FACTOR - VERTICAL_PUPIL_SHIFT
+    );
+
+    vertex(
+      x * HORIZONTAL_PUPIL_SHIFT * EYE_OFFSET_FACTOR - eyeLine/2, 
+      y * EYE_OFFSET_FACTOR - VERTICAL_PUPIL_SHIFT  
+      + ((side === "left") ? eyeLine/2 : -eyeLine/2)
+    );
+
+    vertex(
+      x * HORIZONTAL_PUPIL_SHIFT * EYE_OFFSET_FACTOR - eyeLine, 
+      y * EYE_OFFSET_FACTOR - VERTICAL_PUPIL_SHIFT 
+      + ((side === "left") ? eyeLine * PUPIL_LINE_MAX_FACTOR : -eyeLine * PUPIL_LINE_MIN_FACTOR)
+    );
 
     endShape();
-    pop();
-
     pop();
   }
 
@@ -206,16 +233,19 @@ function Face() {
     const NOSE_TIP = positions.nose_tip;
     const NOSE_BRIDGE = positions.nose_bridge;
 
+    push();
+    const SCALE_FACTOR = 1.3;
+    scale(SCALE_FACTOR);
+
     /* Back eyes */
     let facing = this.facingDir(CHIN, NOSE_TIP,  0.07);
     
-    
     if (facing[0] === "neutral" || facing[0] === "left") {
-      this.drawEye(LEFT_EYE[0][0], LEFT_EYE[0][1], this.eyeColor, this.pupilColor, LEFT_EYE, "left");
+      this.drawEye(LEFT_EYE[0][0], LEFT_EYE[0][1], this.eyeColor, this.pupilColor, LEFT_EYE, this.eyeSizeSliderValue, "left");
 
     }
     if (facing[0] === "neutral" || facing[0] === "right") {
-      this.drawEye(RIGHT_EYE[3][0], RIGHT_EYE[3][1], this.eyeColor, this.pupilColor, RIGHT_EYE, "right");
+      this.drawEye(RIGHT_EYE[3][0], RIGHT_EYE[3][1], this.eyeColor, this.pupilColor, RIGHT_EYE,this.eyeSizeSliderValue, "right");
     }
 
     /* Outline */
@@ -230,12 +260,14 @@ function Face() {
 
     /* Front eyes */
     if (facing[0] === "right") {
-      this.drawEye(LEFT_EYE[0][0], LEFT_EYE[0][1], this.eyeColor, this.pupilColor, LEFT_EYE, "left");
+      this.drawEye(LEFT_EYE[0][0], LEFT_EYE[0][1], this.eyeColor, this.pupilColor, LEFT_EYE, this.eyeSizeSliderValue, "left");
     }
 
     if (facing[0] === "left") {
-      this.drawEye(RIGHT_EYE[3][0], RIGHT_EYE[3][1], this.eyeColor, this.pupilColor, RIGHT_EYE, "right");
+      this.drawEye(RIGHT_EYE[3][0], RIGHT_EYE[3][1], this.eyeColor, this.pupilColor, RIGHT_EYE, this.eyeSizeSliderValue, "right");
     }
+
+    pop();
 
     // this.drawContour(positions, 80);
 
@@ -264,7 +296,7 @@ function Face() {
   /* set internal properties based on list numbers 0-100 */
   this.setProperties = function(settings) {
     this.num_eyes = int(map(settings[0], 0, 100, 1, 2));
-    this.eyeShiftSliderValue = map(settings[1], 0, 100, this.eyeShiftSliderMin, this.eyeShiftSliderMax);
+    this.eyeSizeSliderValue = map(settings[1], 0, 100, this.eyeSizeSliderMin, this.eyeSizeSliderMax);
     this.mouthSizeSliderValue = map(settings[2], 0, 100, this.mouthSizeSliderMin, this.mouthSizeSliderMax);
   }
 
@@ -272,7 +304,7 @@ function Face() {
   this.getProperties = function() {
     let settings = new Array(3);
     settings[0] = map(this.num_eyes, 1, 2, 0, 100);
-    settings[1] = map(this.eyeShiftSliderValue, this.eyeShiftSliderMin, this.eyeShiftSliderMax, 0, 100);
+    settings[1] = map(this.eyeSizeSliderValue, this.eyeSizeSliderMin, this.eyeSizeSliderMax, 0, 100);
     settings[2] = map(this.mouthSizeSliderValue, this.mouthSizeSliderMin, this.mouthSizeSliderMax, 0, 100);
     return settings;
   }

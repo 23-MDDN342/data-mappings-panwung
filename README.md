@@ -22,3 +22,6 @@ Made some minor adjustments to the positioning of the face. I plan on adding som
 
 19/05
 Made the line that goes through the pupil's curve. Also made a slider which controls the horizontal position of the pupils.
+
+21/05
+Changed eye shift slider to eye size slider.
