@@ -25,3 +25,6 @@ Made the line that goes through the pupil's curve. Also made a slider which cont
 
 21/05
 Changed eye shift slider to eye size slider.
+
+22/05
+Added a shadow to half of the face depending on where they are facing. Facing left or right will shade the respective parts of the face darker, neutral facing will result in darker edges.

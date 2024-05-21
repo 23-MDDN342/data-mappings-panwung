@@ -41,6 +41,8 @@ function Face() {
   this.eyeSizeSliderMax = 1.3;
   this.eyeSizeSliderValue = (this.eyeSizeSliderMin + this.eyeSizeSliderMax) / 2;
 
+  this.num_eyes = 1;
+
   // Colours
   this.faceColor = [147, 218, 86];
   this.mouthColor = [155, 39, 65];
@@ -61,9 +63,9 @@ function Face() {
     if (_debug) {
       push();
       ellipseMode(CENTER);
-      noStroke(0);
+      noStroke();
 
-      fill([255, 0, 0]);
+      fill([0, 255, 255]);
       circle(noseTip[2][0], noseTip[2][1], 0.15);
 
       fill([255, 255, 255]);
@@ -100,20 +102,51 @@ function Face() {
     return newCol;
   }
 
-  this.drawOutline = function(col, chin, noseBridge, mouthSize, outlineScale=1) {
+  this.drawOutline = function(col, chin, noseBridge, mouthSize, facing, outlineScale=1) {
     push();
     scale(1);
     strokeJoin(ROUND);
     strokeWeight(0.2);
     stroke(col);
     fill(col);
-    
-    beginShape();
-    vertex(outlineScale * chin[2][0],        outlineScale * chin[2][1]             );
-    vertex(outlineScale * chin[8][0],        outlineScale * mouthSize              );
-    vertex(outlineScale * chin[14][0],       outlineScale * chin[14][1]            );
-    vertex(outlineScale * noseBridge[0][0],  outlineScale * noseBridge[0][1] * 2.5 );
-    endShape(CLOSE);
+
+    if (facing === "neutral" || facing === undefined) {
+      stroke(this.scaleColor(col, 0.8));
+      beginShape();
+      vertex(outlineScale * chin[2][0],        outlineScale * chin[2][1]             );
+      vertex(outlineScale * chin[8][0],        outlineScale * mouthSize              );
+      vertex(outlineScale * chin[14][0],       outlineScale * chin[14][1]            );
+      vertex(outlineScale * noseBridge[0][0],  outlineScale * noseBridge[0][1] * 2.5 );
+      endShape(CLOSE);
+    }
+    else {
+      // Left side
+      if (facing === "left") { 
+        fill(this.scaleColor(col, 0.8)); 
+        stroke(this.scaleColor(col, 0.8));
+      }
+      beginShape();
+      vertex(outlineScale * noseBridge[0][0],  outlineScale * noseBridge[0][1] * 2.5 );
+      vertex(outlineScale * chin[2][0],        outlineScale * chin[2][1]             );
+      vertex(outlineScale * chin[8][0],        outlineScale * mouthSize              );
+      vertex(outlineScale * noseBridge[1][0], outlineScale * noseBridge[1][1] * mouthSize);
+      endShape(CLOSE);
+
+      fill(col);
+      stroke(col);
+      if (facing === "right") { 
+        fill(this.scaleColor(col, 0.8)); 
+        stroke(this.scaleColor(col, 0.8));
+      }
+      // Right side
+      beginShape();
+      vertex(outlineScale * noseBridge[0][0],  outlineScale * noseBridge[0][1] * 2.5 );
+      vertex(outlineScale * chin[14][0],       outlineScale * chin[14][1]            );
+      vertex(outlineScale * chin[8][0],        outlineScale * mouthSize              );
+      vertex(outlineScale * noseBridge[1][0], outlineScale * noseBridge[1][1] * mouthSize);
+      endShape(CLOSE);
+    }
+
 
     pop();
   }
@@ -131,6 +164,10 @@ function Face() {
     vertex(mouthScale * chin[14][0], mouthScale * chin[14][1]);
     vertex(mouthScale * chin[8][0],  mouthScale * mouthSize);
     endShape(CLOSE);
+
+    fill([0, 0, 0])
+    noStroke()
+    circle(mouthScale * noseBridge[1][0], mouthScale * noseBridge[1][1] * mouthSize, 0.1)
 
     pop();
   }
@@ -250,8 +287,8 @@ function Face() {
 
     /* Outline */
     const OUTLINE_SCALE = 1.07;
-    this.drawOutline(this.scaleColor(this.faceColor, 1/3), CHIN, NOSE_BRIDGE, this.mouthSizeSliderValue, OUTLINE_SCALE);
-    this.drawOutline(this.faceColor, CHIN, NOSE_BRIDGE, this.mouthSizeSliderValue);
+    this.drawOutline(this.scaleColor(this.faceColor, 1/3), CHIN, NOSE_BRIDGE, this.mouthSizeSliderValue, undefined, OUTLINE_SCALE);
+    this.drawOutline(this.faceColor, CHIN, NOSE_BRIDGE, this.mouthSizeSliderValue, facing[0]);
 
     /* Mouth */
     const MOUTH_SCALE = 0.7;
@@ -269,6 +306,7 @@ function Face() {
 
     pop();
 
+    this.facingDir(CHIN, NOSE_TIP,  0.07, true);
     // this.drawContour(positions, 80);
 
   }
