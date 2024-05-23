@@ -41,7 +41,10 @@ function Face() {
   this.eyeSizeSliderMax = 1.3;
   this.eyeSizeSliderValue = (this.eyeSizeSliderMin + this.eyeSizeSliderMax) / 2;
 
-  this.num_eyes = 1;
+  // Face colour slider properties
+  this.faceColorSliderMin = 0.7;
+  this.faceColorSliderMax = 1.3;
+  this.faceColorSliderValue = (this.faceColorSliderMin + this.faceColorSliderMax) / 2;
 
   // Colours
   this.faceColor = [147, 218, 86];
@@ -49,6 +52,7 @@ function Face() {
   this.tongueColor = [230, 53, 79];
   this.eyeColor = [255, 255, 255];
   this.pupilColor = [0, 0, 0];
+
   this.chinColor = [153, 153, 51];
   this.lipColor = [136, 68, 68];
   this.eyebrowColor = [119, 85, 17];
@@ -166,8 +170,7 @@ function Face() {
     endShape(CLOSE);
 
     fill([0, 0, 0])
-    noStroke()
-    circle(mouthScale * noseBridge[1][0], mouthScale * noseBridge[1][1] * mouthSize, 0.1)
+    noStroke();
 
     pop();
   }
@@ -271,6 +274,7 @@ function Face() {
     const NOSE_BRIDGE = positions.nose_bridge;
 
     push();
+
     const SCALE_FACTOR = 1.3;
     scale(SCALE_FACTOR);
 
@@ -285,10 +289,12 @@ function Face() {
       this.drawEye(RIGHT_EYE[3][0], RIGHT_EYE[3][1], this.eyeColor, this.pupilColor, RIGHT_EYE,this.eyeSizeSliderValue, "right");
     }
 
+    let fc = this.scaleColor(this.faceColor, this.faceColorSliderValue);
+
     /* Outline */
     const OUTLINE_SCALE = 1.07;
-    this.drawOutline(this.scaleColor(this.faceColor, 1/3), CHIN, NOSE_BRIDGE, this.mouthSizeSliderValue, undefined, OUTLINE_SCALE);
-    this.drawOutline(this.faceColor, CHIN, NOSE_BRIDGE, this.mouthSizeSliderValue, facing[0]);
+    this.drawOutline(this.scaleColor(fc, 1/3), CHIN, NOSE_BRIDGE, this.mouthSizeSliderValue, undefined, OUTLINE_SCALE);
+    this.drawOutline(fc, CHIN, NOSE_BRIDGE, this.mouthSizeSliderValue, facing[0]);
 
     /* Mouth */
     const MOUTH_SCALE = 0.7;
@@ -306,7 +312,7 @@ function Face() {
 
     pop();
 
-    this.facingDir(CHIN, NOSE_TIP,  0.07, true);
+    // this.facingDir(CHIN, NOSE_TIP,  0.07, true);
     // this.drawContour(positions, 80);
 
   }
@@ -333,7 +339,7 @@ function Face() {
 
   /* set internal properties based on list numbers 0-100 */
   this.setProperties = function(settings) {
-    this.num_eyes = int(map(settings[0], 0, 100, 1, 2));
+    this.faceColorSliderValue = map(settings[0], 0, 100, this.faceColorSliderMin, this.faceColorSliderMax);
     this.eyeSizeSliderValue = map(settings[1], 0, 100, this.eyeSizeSliderMin, this.eyeSizeSliderMax);
     this.mouthSizeSliderValue = map(settings[2], 0, 100, this.mouthSizeSliderMin, this.mouthSizeSliderMax);
   }
@@ -341,7 +347,7 @@ function Face() {
   /* get internal properties as list of numbers 0-100 */
   this.getProperties = function() {
     let settings = new Array(3);
-    settings[0] = map(this.num_eyes, 1, 2, 0, 100);
+    settings[0] = map(this.faceColorSliderValue, this.faceColorSliderMin, this.faceColorSliderMax, 0, 100);
     settings[1] = map(this.eyeSizeSliderValue, this.eyeSizeSliderMin, this.eyeSizeSliderMax, 0, 100);
     settings[2] = map(this.mouthSizeSliderValue, this.mouthSizeSliderMin, this.mouthSizeSliderMax, 0, 100);
     return settings;

@@ -28,3 +28,6 @@ Changed eye shift slider to eye size slider.
 
 22/05
 Added a shadow to half of the face depending on where they are facing. Facing left or right will shade the respective parts of the face darker, neutral facing will result in darker edges.
+
+23/05
+Added a face colour slider which can be adjusted depending on the colour of a person's skin. This just makes Kermit's green either lighter or darker. 
