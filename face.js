@@ -7,7 +7,7 @@
 var DEBUG_MODE = true;
 
 // this can be used to set the number of sliders to show
-var NUM_SLIDERS = 3;
+var NUM_SLIDERS = 5;
 
 // other variables can be in here too
 // here's some examples for colors used
@@ -36,15 +36,27 @@ function Face() {
   this.mouthSizeSliderMax = 1.8;
   this.mouthSizeSliderValue = (this.mouthSizeSliderMin + this.mouthSizeSliderMax) / 2; 
 
+  // Lip slider properties
+  this.lipSizeSliderMin = 0.5;
+  this.lipSizeSliderMax = 1;
+  this.lipSizeSliderValue = (this.lipSizeSliderMin + this.lipSizeSliderMax) / 2; 
+
   // Eye size slider properties
   this.eyeSizeSliderMin = 0.7;
   this.eyeSizeSliderMax = 1.3;
   this.eyeSizeSliderValue = (this.eyeSizeSliderMin + this.eyeSizeSliderMax) / 2;
 
+  // Eye separation colour slider properties
+  this.eyeSeparationSliderMin = -1.5;
+  this.eyeSeparationSliderMax = 1.5;
+  this.eyeSeparationSliderValue = (this.eyeSeparationSliderMin + this.eyeSeparationSliderMax) / 2;
+
   // Face colour slider properties
   this.faceColorSliderMin = 0.7;
   this.faceColorSliderMax = 1.3;
   this.faceColorSliderValue = (this.faceColorSliderMin + this.faceColorSliderMax) / 2;
+
+
 
   // Colours
   this.faceColor = [147, 218, 86];
@@ -163,9 +175,9 @@ function Face() {
     fill(col);
 
     beginShape();
-    vertex(mouthScale * chin[2][0],  mouthScale * chin[2][1]);
+    vertex(mouthScale * chin[2][0] * this.lipSizeSliderValue,  mouthScale * chin[2][1]);
     vertex(mouthScale * noseBridge[1][0], mouthScale * noseBridge[1][1] * mouthSize);
-    vertex(mouthScale * chin[14][0], mouthScale * chin[14][1]);
+    vertex(mouthScale * chin[14][0] * this.lipSizeSliderValue, mouthScale * chin[14][1]);
     vertex(mouthScale * chin[8][0],  mouthScale * mouthSize);
     endShape(CLOSE);
 
@@ -187,7 +199,8 @@ function Face() {
 
 
     ellipse(
-      x * EYE_OFFSET_FACTOR, y * EYE_OFFSET_FACTOR, 
+      x * EYE_OFFSET_FACTOR  * this.eyeSeparationSliderValue, 
+      y * EYE_OFFSET_FACTOR, 
       1.5 * Math.abs(eye[0][0] - eye[3][0]) * eyeScale, 
       1.5 * Math.abs(eye[0][0] - eye[3][0]) * eyeScale
     );
@@ -202,7 +215,8 @@ function Face() {
     noStroke();
 
     ellipse(
-      x * HORIZONTAL_PUPIL_SHIFT * EYE_OFFSET_FACTOR, y * EYE_OFFSET_FACTOR - VERTICAL_PUPIL_SHIFT, 
+      x * HORIZONTAL_PUPIL_SHIFT * EYE_OFFSET_FACTOR * this.eyeSeparationSliderValue, 
+      y * EYE_OFFSET_FACTOR - VERTICAL_PUPIL_SHIFT, 
       0.5 * Math.abs(eye[0][0] - eye[3][0]) * eyeScale, 
       0.5 * Math.abs(eye[0][0] - eye[3][0]) * eyeScale
     );
@@ -218,30 +232,30 @@ function Face() {
     beginShape();
 
     vertex(
-      x * HORIZONTAL_PUPIL_SHIFT * EYE_OFFSET_FACTOR + eyeLine, 
+      x * HORIZONTAL_PUPIL_SHIFT * EYE_OFFSET_FACTOR * this.eyeSeparationSliderValue + eyeLine, 
       y * EYE_OFFSET_FACTOR - VERTICAL_PUPIL_SHIFT 
       + ((side === "left") ? -eyeLine * PUPIL_LINE_MIN_FACTOR : eyeLine * PUPIL_LINE_MAX_FACTOR)
     );
 
     vertex(
-      x * HORIZONTAL_PUPIL_SHIFT * EYE_OFFSET_FACTOR + eyeLine/2, 
+      x * HORIZONTAL_PUPIL_SHIFT * EYE_OFFSET_FACTOR * this.eyeSeparationSliderValue + eyeLine/2, 
       y * EYE_OFFSET_FACTOR - VERTICAL_PUPIL_SHIFT  
       + ((side === "left") ? -eyeLine/2 : eyeLine/2)
     );
 
     vertex(
-      x * HORIZONTAL_PUPIL_SHIFT * EYE_OFFSET_FACTOR, 
+      x * HORIZONTAL_PUPIL_SHIFT * EYE_OFFSET_FACTOR * this.eyeSeparationSliderValue, 
       y * EYE_OFFSET_FACTOR - VERTICAL_PUPIL_SHIFT
     );
 
     vertex(
-      x * HORIZONTAL_PUPIL_SHIFT * EYE_OFFSET_FACTOR - eyeLine/2, 
+      x * HORIZONTAL_PUPIL_SHIFT * EYE_OFFSET_FACTOR * this.eyeSeparationSliderValue - eyeLine/2, 
       y * EYE_OFFSET_FACTOR - VERTICAL_PUPIL_SHIFT  
       + ((side === "left") ? eyeLine/2 : -eyeLine/2)
     );
 
     vertex(
-      x * HORIZONTAL_PUPIL_SHIFT * EYE_OFFSET_FACTOR - eyeLine, 
+      x * HORIZONTAL_PUPIL_SHIFT * EYE_OFFSET_FACTOR * this.eyeSeparationSliderValue - eyeLine, 
       y * EYE_OFFSET_FACTOR - VERTICAL_PUPIL_SHIFT 
       + ((side === "left") ? eyeLine * PUPIL_LINE_MAX_FACTOR : -eyeLine * PUPIL_LINE_MIN_FACTOR)
     );
@@ -275,7 +289,7 @@ function Face() {
 
     push();
 
-    const SCALE_FACTOR = 1.3;
+    const SCALE_FACTOR = 1.4;
     scale(SCALE_FACTOR);
 
     /* Back eyes */
@@ -313,7 +327,7 @@ function Face() {
     pop();
 
     // this.facingDir(CHIN, NOSE_TIP,  0.07, true);
-    // this.drawContour(positions, 80);
+    this.drawContour(positions, 80);
 
   }
 
@@ -341,7 +355,9 @@ function Face() {
   this.setProperties = function(settings) {
     this.faceColorSliderValue = map(settings[0], 0, 100, this.faceColorSliderMin, this.faceColorSliderMax);
     this.eyeSizeSliderValue = map(settings[1], 0, 100, this.eyeSizeSliderMin, this.eyeSizeSliderMax);
-    this.mouthSizeSliderValue = map(settings[2], 0, 100, this.mouthSizeSliderMin, this.mouthSizeSliderMax);
+    this.eyeSeparationSliderValue = map(settings[2], 0, 100, this.eyeSizeSliderMin, this.eyeSizeSliderMax);
+    this.mouthSizeSliderValue = map(settings[3], 0, 100, this.mouthSizeSliderMin, this.mouthSizeSliderMax);
+    this.lipSizeSliderValue = map(settings[4], 0, 100, this.lipSizeSliderMin, this.lipSizeSliderMax);
   }
 
   /* get internal properties as list of numbers 0-100 */
@@ -349,7 +365,9 @@ function Face() {
     let settings = new Array(3);
     settings[0] = map(this.faceColorSliderValue, this.faceColorSliderMin, this.faceColorSliderMax, 0, 100);
     settings[1] = map(this.eyeSizeSliderValue, this.eyeSizeSliderMin, this.eyeSizeSliderMax, 0, 100);
-    settings[2] = map(this.mouthSizeSliderValue, this.mouthSizeSliderMin, this.mouthSizeSliderMax, 0, 100);
+    settings[2] = map(this.eyeSeparationSliderValue, this.eyeSeparationSliderMin, this.eyeSeparationSliderMax, 0, 100);
+    settings[3] = map(this.mouthSizeSliderValue, this.mouthSizeSliderMin, this.mouthSizeSliderMax, 0, 100);
+    settings[4] =  map(this.lipSizeSliderValue, this.lipSizeSliderMin, this.lipSizeSliderMax, 0, 100);
     return settings;
   }
 }

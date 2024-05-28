@@ -31,3 +31,7 @@ Added a shadow to half of the face depending on where they are facing. Facing le
 
 23/05
 Added a face colour slider which can be adjusted depending on the colour of a person's skin. This just makes Kermit's green either lighter or darker. 
+
+28/05
+Added an extra slider for eye separation, which controls how far apart horizontally the eyes are from each other.
+Added another slider for mouth size, this time controlling the distance between the mouth edges.
