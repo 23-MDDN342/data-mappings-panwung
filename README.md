@@ -68,4 +68,4 @@ Added an extra slider for eye separation, which controls how far apart horizonta
 Began training the AI. Still need some images.
 
 30/05
-Completed readme. Complete all training.
+Completed readme, complete all training, updated all sample images, and uploaded sketches.
