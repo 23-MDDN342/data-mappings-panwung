@@ -4,7 +4,7 @@
  */  
 
 // remove this or set to false to enable full program (load will be slower)
-var DEBUG_MODE = true;
+var DEBUG_MODE = false;
 
 // this can be used to set the number of sliders to show
 var NUM_SLIDERS = 5;
@@ -32,9 +32,9 @@ function segment_average(segment) {
 function Face() {
 
   // Mouth slider properties
-  this.mouthSizeSliderMin = 0.18;
-  this.mouthSizeSliderMax = 1.8;
-  this.mouthSizeSliderValue = (this.mouthSizeSliderMin + this.mouthSizeSliderMax) / 2; 
+  this.mouthLowerSliderMin = 0.18;
+  this.mouthLowerSliderMax = 1.8;
+  this.mouthLowerSliderValue = (this.mouthLowerSliderMin + this.mouthLowerSliderMax) / 2; 
 
   // Lip slider properties
   this.lipSizeSliderMin = 0.5;
@@ -55,8 +55,6 @@ function Face() {
   this.faceColorSliderMin = 0.7;
   this.faceColorSliderMax = 1.3;
   this.faceColorSliderValue = (this.faceColorSliderMin + this.faceColorSliderMax) / 2;
-
-
 
   // Colours
   this.faceColor = [147, 218, 86];
@@ -162,8 +160,6 @@ function Face() {
       vertex(outlineScale * noseBridge[1][0], outlineScale * noseBridge[1][1] * mouthSize);
       endShape(CLOSE);
     }
-
-
     pop();
   }
 
@@ -263,8 +259,7 @@ function Face() {
     endShape();
     pop();
   }
-
-
+  
   /*
    * Draw the face with position lists that include:
    *    chin, right_eye, left_eye, right_eyebrow, left_eyebrow
@@ -289,8 +284,11 @@ function Face() {
 
     push();
 
-    const SCALE_FACTOR = 1.4;
+    const SCALE_FACTOR = 1.6;
+    const VERTICAL_TRANSLATION_FACTOR = 0.45;
     scale(SCALE_FACTOR);
+    translate(0, VERTICAL_TRANSLATION_FACTOR);
+
 
     /* Back eyes */
     let facing = this.facingDir(CHIN, NOSE_TIP,  0.07);
@@ -307,13 +305,13 @@ function Face() {
 
     /* Outline */
     const OUTLINE_SCALE = 1.07;
-    this.drawOutline(this.scaleColor(fc, 1/3), CHIN, NOSE_BRIDGE, this.mouthSizeSliderValue, undefined, OUTLINE_SCALE);
-    this.drawOutline(fc, CHIN, NOSE_BRIDGE, this.mouthSizeSliderValue, facing[0]);
+    this.drawOutline(this.scaleColor(fc, 1/3), CHIN, NOSE_BRIDGE, this.mouthLowerSliderValue, undefined, OUTLINE_SCALE);
+    this.drawOutline(fc, CHIN, NOSE_BRIDGE, this.mouthLowerSliderValue, facing[0]);
 
     /* Mouth */
     const MOUTH_SCALE = 0.7;
-    this.drawMouth(this.mouthColor, CHIN, NOSE_BRIDGE, this.mouthSizeSliderValue, MOUTH_SCALE);
-    this.drawMouth(this.tongueColor, CHIN, NOSE_BRIDGE, this.mouthSizeSliderValue, MOUTH_SCALE/2);
+    this.drawMouth(this.mouthColor, CHIN, NOSE_BRIDGE, this.mouthLowerSliderValue, MOUTH_SCALE);
+    this.drawMouth(this.tongueColor, CHIN, NOSE_BRIDGE, this.mouthLowerSliderValue, MOUTH_SCALE/2);
 
     /* Front eyes */
     if (facing[0] === "right") {
@@ -327,7 +325,7 @@ function Face() {
     pop();
 
     // this.facingDir(CHIN, NOSE_TIP,  0.07, true);
-    this.drawContour(positions, 80);
+    // this.drawContour(positions, 80);
 
   }
 
@@ -356,7 +354,7 @@ function Face() {
     this.faceColorSliderValue = map(settings[0], 0, 100, this.faceColorSliderMin, this.faceColorSliderMax);
     this.eyeSizeSliderValue = map(settings[1], 0, 100, this.eyeSizeSliderMin, this.eyeSizeSliderMax);
     this.eyeSeparationSliderValue = map(settings[2], 0, 100, this.eyeSizeSliderMin, this.eyeSizeSliderMax);
-    this.mouthSizeSliderValue = map(settings[3], 0, 100, this.mouthSizeSliderMin, this.mouthSizeSliderMax);
+    this.mouthLowerSliderValue = map(settings[3], 0, 100, this.mouthLowerSliderMin, this.mouthLowerSliderMax);
     this.lipSizeSliderValue = map(settings[4], 0, 100, this.lipSizeSliderMin, this.lipSizeSliderMax);
   }
 
@@ -366,7 +364,7 @@ function Face() {
     settings[0] = map(this.faceColorSliderValue, this.faceColorSliderMin, this.faceColorSliderMax, 0, 100);
     settings[1] = map(this.eyeSizeSliderValue, this.eyeSizeSliderMin, this.eyeSizeSliderMax, 0, 100);
     settings[2] = map(this.eyeSeparationSliderValue, this.eyeSeparationSliderMin, this.eyeSeparationSliderMax, 0, 100);
-    settings[3] = map(this.mouthSizeSliderValue, this.mouthSizeSliderMin, this.mouthSizeSliderMax, 0, 100);
+    settings[3] = map(this.mouthLowerSliderValue, this.mouthLowerSliderMin, this.mouthLowerSliderMax, 0, 100);
     settings[4] =  map(this.lipSizeSliderValue, this.lipSizeSliderMin, this.lipSizeSliderMax, 0, 100);
     return settings;
   }
